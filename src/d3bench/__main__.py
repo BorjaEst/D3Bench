@@ -1,66 +1,122 @@
-import os
+"""
+This module provides a command-line interface to run D3Bench benchmarks.
 
-from d3bench import benchmark, dataset
-from d3bench.benchmark import Criteria
-from d3bench.dataset import Data_Energy, Data_Occupacy
+The script allows users to specify various parameters for the benchmark,
+including the buildings to benchmark, the criteria to test, the tools to use,
+whether to run on a VM, the dataset to use, and the logging level.
+"""
+
+import argparse
+import logging
+
+from d3bench import config
+from d3bench.benchmark import Benchmark, Criteria
+from d3bench.dataset import Data_Energy, Data_Occupancy
 from d3bench.tool import AlibiDetect, Evidently, NannyML
 
 
-def main():
-    clean()
-    ####################################
-    # use can change or define the benchmark here:
-    # 1. select dataset: True if you want to investigate energy dataset, False if you want to investigate Occupacy dataset
-    energy = False 
+logger = logging.getLogger(__name__)
+parser = argparse.ArgumentParser(
+    description=__doc__,
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    epilog="Available tests: FUNCTIONAL, RUNTIME, CPU_RUNTIME, STORAGE\n"
+    "Available tools: Evidently, NannyML, AlibiDetect",
+)
+parser.add_argument(
+    "--buildings",
+    type=int,
+    nargs="+",
+    default=[1],
+    help="List of building IDs to benchmark.",
+)
+parser.add_argument(
+    "--tests",
+    type=str,
+    nargs="+",
+    default=["FUNCTIONAL", "RUNTIME", "CPU_RUNTIME", "STORAGE"],
+    help="List of criteria to test.",
+)
+parser.add_argument(
+    "--tools",
+    type=str,
+    nargs="+",
+    default=["Evidently", "NannyML", "AlibiDetect"],
+    help="List of tools to benchmark.",
+)
+parser.add_argument(
+    "--vm",
+    action="store_true",
+    help="Run on VM if set, otherwise run locally.",
+)
+parser.add_argument(
+    "--dataset",
+    type=str,
+    choices=["energy", "occupancy"],
+    default="energy",
+    help="Dataset to use (default: energy).",
+)
+parser.add_argument(
+    "--log-level",
+    type=str,
+    choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+    default="INFO",
+    help="Logging level (default: INFO).",
+)
 
-    # 2. select the tools
-    tools = {Evidently("Evidently", False), Evidently("Evidently", True),
-              NannyML("NannyML", False), NannyML("NannyML", True), 
-              AlibiDetect("AlibiDetect")} 
 
-    # 3. select criteria
-    criteria = [Criteria.FUNCTIONAL, Criteria.RUNTIME, Criteria.CPU_RUNTIME, Criteria.STORAGE]
+def main(args):
+    """Run the benchmark with the given arguments."""
 
-    # 4. select if run on vm: True if run on vm, False if run locally
-    vm = False
+    # Print benchmark start message
+    print("---------Benchmark execution started---------")
 
-    # finished
-    #####################################
+    # Set the logging level from the arguments
+    logger.setLevel(args.log_level)
+    logger.debug("args: %s", args)
 
-    if energy:
-        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'energy_data.csv')
-        dataset= Data_Energy(path)
+    # Define the criteria and buildings to test
+    tests = [Criteria[criterion] for criterion in args.tests]
+    buildings = set(args.buildings)
+    vm = args.vm
+    dataset = args.dataset
 
-    else:
-        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'occupacy_data.csv')
-        dataset = Data_Occupacy(path)
+    # Run the benchmark with the given parameters
+    for tool in set(args.tools):
+        logger.info("Running benchmark for tool: %s", tool)
+        run_benchmark(buildings, tool, tests, vm, dataset)
 
-    runBenchmark(buildings={1}, tests=criteria, tools=tools, vm = vm, dataset=dataset)
-    print("---------Benchmark execution finished---------")
+    # Print the benchmark end message
+    print("---------Benchmark execution completed---------")
+
 
 # one benchmark execution with given criteria, tools and dataset
-def runBenchmark(buildings = {1}, tests=[Criteria.FUNCTIONAL, Criteria.RUNTIME, Criteria.CPU_RUNTIME, Criteria.STORAGE],
-                  tools={(Evidently("Evidently", showReport=False))}, vm = False, 
-                  dataset=Data_Energy(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'energy_data.csv'))):
-    for tool in tools:
-        benchmark = Benchmark.Benchmark(tool, dataset, tests, buildings, vm)
-        benchmark.runBenchmark()
+def run_benchmark(buildings, tool, tests, vm, dataset):
+    """Run benchmark with the given parameters."""
 
-# delete all reports
-def clean():
-    tests = {'kolmogorov_smirnov', 'anderson', 'cramer_von_mises', 'ed', 'es', 'hellinger', 'jensenshannon', 
-             'kl_div', 'mannw', 'psi', 't_test', 'wasserstein', 'jensen_shannon'}
-    for i in range(1, 37):
-        for test in tests:
-            file_name = "evidently_report_{}_{}.html".format(i, test)
-            if os.path.exists(file_name):
-                os.remove(file_name)
-            file_name = "nannyml_report_dist_{}_{}.svg".format(i, test)
-            if os.path.exists(file_name):
-                os.remove(file_name)
-            file_name = "nannyml_report_drift_{}_{}.svg".format(i, test)
-            if os.path.exists(file_name):
-                os.remove(file_name)
+    # Convert the tool name to the corresponding tool object
+    match tool:
+        case "Evidently":
+            tool = Evidently("Evidently", showReport=True)
+        case "NannyML":
+            tool = NannyML("NannyML", showReport=True)
+        case "AlibiDetect":
+            tool = AlibiDetect("AlibiDetect")
 
+    # Convert the dataset name to the corresponding dataset object
+    match dataset:
+        case "energy":
+            dataset = Data_Energy(f"{config.DATA_PATH}/energy_data.csv")
+        case "occupancy":
+            dataset = Data_Occupancy(f"{config.DATA_PATH}/occupancy_data.csv")
+        case _:
+            raise ValueError(f"Invalid dataset: {dataset}")
+
+    # Run benchmark for each tool
+    benchmark = Benchmark(tool, dataset, tests, buildings, vm)
+    benchmark.runBenchmark()
+
+
+# Run main function if the script is executed
 if __name__ == "__main__":
-    main()
+    arguments = parser.parse_args()
+    main(arguments)
