@@ -1,12 +1,10 @@
-import Benchmark
-from Benchmark import Criteria
-from Tool import Evidently
-from Tool import AlibiDetect
-from Tool import NannyML
-import Dataset
-from Dataset import Data_Occupacy
-from Dataset import Data_Energy
 import os
+
+from d3bench import benchmark, dataset
+from d3bench.benchmark import Criteria
+from d3bench.dataset import Data_Energy, Data_Occupacy
+from d3bench.tool import AlibiDetect, Evidently, NannyML
+
 
 def main():
     clean()

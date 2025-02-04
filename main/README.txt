@@ -1,1 +1,0 @@
-In diesem Ordner ist der entwickelte Source Code und die Ergebnisse gespeichert.
