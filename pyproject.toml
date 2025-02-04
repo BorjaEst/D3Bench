@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "d3-benchmark"
+description = "Source code of the thesis work carried out at Software AG"
+authors = [{ name = "Rieke Mueller", email = "rieke_mueller@softwareag.com" }]
+license = { text = "Apache License 2.0" }
+keywords = ["data quality", "data distribution drift", "ML pipelines"]
+readme = "README.md"
+dynamic = ["version", "dependencies"]
+
+[project.optional-dependencies]
+full = ["evidently~=0.6.1", "nannyml~=0.13.0", "alibi-detect~=0.12.0"]
+
+
+[tool.setuptools.dynamic]
+version = { file = "VERSION" }
+dependencies = { file = "requirements.txt" }
+
+
+[project.urls]
+homepage = "https://github.com/mohamedyd/D3Bench"
+documentation = "https://your_project_docs_url"
+repository = "https://github.com/mohamedyd/D3Bench"
+changelog = "https://your_project_changelog_url"
+issue_tracker = "https://github.com/mohamedyd/D3Bench/issues"
+source = "https://github.com/mohamedyd/D3Bench"
