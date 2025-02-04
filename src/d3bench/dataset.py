@@ -82,7 +82,7 @@ class Data_Energy(Dataset):
             df_group["consumption"] = df_group["consumption"].interpolate() # and linear interpolated
         return df_group
 
-class Data_Occupacy(Dataset):
+class Data_Occupancy(Dataset):
 
     def __init__(self, path):
         super().__init__(path)
