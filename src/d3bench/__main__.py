@@ -8,6 +8,7 @@ whether to run on a VM, the dataset to use, and the logging level.
 
 import argparse
 import logging
+import datetime as dt
 
 from d3bench import config
 from d3bench.benchmark import Benchmark, Criteria
@@ -21,6 +22,18 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     epilog="Available tests: FUNCTIONAL, RUNTIME, CPU_RUNTIME, STORAGE\n"
     "Available tools: Evidently, NannyML, AlibiDetect",
+)
+parser.add_argument(
+    "--log-level",
+    type=str,
+    choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+    default="INFO",
+    help="Logging level (default: INFO).",
+)
+parser.add_argument(
+    "--show-report",
+    action="store_true",
+    help="Show report if set, otherwise do not show report.",
 )
 parser.add_argument(
     "--buildings",
@@ -56,11 +69,9 @@ parser.add_argument(
     help="Dataset to use (default: energy).",
 )
 parser.add_argument(
-    "--log-level",
+    "--report-id",
     type=str,
-    choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-    default="INFO",
-    help="Logging level (default: INFO).",
+    help="Report ID for the benchmark.",
 )
 
 
@@ -75,35 +86,35 @@ def main(args):
     logger.debug("args: %s", args)
 
     # Define the criteria and buildings to test
+    datetime = dt.datetime.now().strftime("%Y%m%d%H%M%S")
+    report_id = args.report_id or f"report_{datetime}"
     tests = [Criteria[criterion] for criterion in args.tests]
     buildings = set(args.buildings)
-    vm = args.vm
-    dataset = args.dataset
 
     # Run the benchmark with the given parameters
     for tool in set(args.tools):
         logger.info("Running benchmark for tool: %s", tool)
-        run_benchmark(buildings, tool, tests, vm, dataset)
+        run_benchmark(report_id, tool, tests, buildings, args)
 
     # Print the benchmark end message
     print("---------Benchmark execution completed---------")
 
 
 # one benchmark execution with given criteria, tools and dataset
-def run_benchmark(buildings, tool, tests, vm, dataset):
+def run_benchmark(report_id, tool, tests, buildings, args):
     """Run benchmark with the given parameters."""
 
     # Convert the tool name to the corresponding tool object
     match tool:
         case "Evidently":
-            tool = Evidently("Evidently", showReport=True)
+            tool = Evidently("Evidently", showReport=args.show_report)
         case "NannyML":
-            tool = NannyML("NannyML", showReport=True)
+            tool = NannyML("NannyML", showReport=args.show_report)
         case "AlibiDetect":
             tool = AlibiDetect("AlibiDetect")
 
     # Convert the dataset name to the corresponding dataset object
-    match dataset:
+    match args.dataset:
         case "energy":
             dataset = Data_Energy(f"{config.DATA_PATH}/energy_data.csv")
         case "occupancy":
@@ -112,8 +123,8 @@ def run_benchmark(buildings, tool, tests, vm, dataset):
             raise ValueError(f"Invalid dataset: {dataset}")
 
     # Run benchmark for each tool
-    benchmark = Benchmark(tool, dataset, tests, buildings, vm)
-    benchmark.runBenchmark()
+    benchmark = Benchmark(tool, dataset, tests, buildings, args.vm)
+    benchmark.runBenchmark(report_id)
 
 
 # Run main function if the script is executed

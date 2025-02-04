@@ -1,9 +1,13 @@
-from datetime import datetime
+import os.path
 import time
+from datetime import datetime
 from enum import Enum
+
 import pandas as pd
 from memory_profiler import memory_usage
-import os.path
+
+from d3bench import config
+
 
 class Criteria(Enum):
     FUNCTIONAL = 0
@@ -28,7 +32,7 @@ class Benchmark:
         self.runOnVm = vm
         self.driftDetectionStats = {}
 
-    def runBenchmark(self):
+    def runBenchmark(self, report_id):
         for criteria in self.criterias:
             if criteria == Criteria.FUNCTIONAL:
                 self.runFunctional()
@@ -40,9 +44,9 @@ class Benchmark:
                 self.runStorage()
 
         # generate Report
-        self.__printReport()
+        self.__printReport(report_id)
 
-    def __printReport(self):
+    def __printReport(self, report_id):
         self.driftDetectionStats=pd.DataFrame.from_dict(self.driftDetectionStats)
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print("==============================")
@@ -56,14 +60,14 @@ class Benchmark:
             print("Gebäude {}".format(x))
             building_stats = self.driftDetectionStats[x]
             column_names = self.tool.column_names
-            
+
             # Extract the drift scores and is_drifted values
             for col in column_names:
                 drift_score = {test: stats.get(f"{col}_drift_score", stats.get("drift_score"))
-                                for test, stats in building_stats.items()
+                    for test, stats in building_stats.items()
                                 if isinstance(stats, dict)}
                 is_drifted = {test: stats.get(f"{col}_is_drifted", stats.get("is_drifted"))
-                                for test, stats in building_stats.items()
+                    for test, stats in building_stats.items()
                                 if isinstance(stats, dict)}
                 print(f"Column: {col}")
                 print(f"Drift Score: {drift_score}")
@@ -80,12 +84,12 @@ class Benchmark:
         print("RAM Usage MAX: {:.7f} MiB".format(self.ram_max))
         print("==============================")
 
-        self.__saveReport(current_time=current_time)
+        self.__saveReport(report_id, current_time)
 
-    
-    def __saveReport(self, current_time):
+    def __saveReport(self, report_id, current_time):
         self.driftDetectionStats = pd.DataFrame.from_dict(self.driftDetectionStats)
         column_names = self.tool.column_names
+        report_dir = config.RESULTS_PATH / report_id
 
         # Append data for each test to the report list
         report_data = []
@@ -134,10 +138,13 @@ class Benchmark:
         # Create a DataFrame from the report data
         report_df = pd.DataFrame(report_data)
 
-        if os.path.exists('benchmark_report.csv'):
-            report_df.to_csv('benchmark_report.csv', mode='a', index=False, header=False)
+        # Save the report to a CSV file
+        os.makedirs(report_dir, exist_ok=True)
+        report_path = report_dir / "benchmark_report.csv"
+        if os.path.exists(report_path):
+            report_df.to_csv(report_path, mode="a", index=False, header=False)
         else:
-            report_df.to_csv('benchmark_report.csv', index=False)
+            report_df.to_csv(report_path, index=False)
 
     def runFunctional(self):
         for building_id in self.buildings:
@@ -154,8 +161,8 @@ class Benchmark:
                 self.driftDetectionStats[building_id].update(my_dict)
 
     # measures elapsed time using wall-clock time (include: waiting time for resources, dependant on other processes): time in ms
-    def runRuntime(self):  
-        runtime_sum = 0  
+    def runRuntime(self):
+        runtime_sum = 0
         self.runtime_max = 0
 
         for building_id in self.buildings:
@@ -174,17 +181,17 @@ class Benchmark:
             self.runtime_max = max(self.runtime_max, runtime_result)
 
         # compute average runtime
-        self.runtime_avg = runtime_sum / len(self.buildings) 
+        self.runtime_avg = runtime_sum / len(self.buildings)
 
     # measures cpu resources (user and system) consumed by the process (exclude: waiting time for resources): time in ms
     def runCPUruntime(self):
-        cpu_sum = 0  
+        cpu_sum = 0
         self.runtime_cpu_max = 0
         for building_id in self.buildings:
             ref, cur = self.dataset.splitTrainTest(building_id)
 
             # Start measuring CPU Usage (include user and system cpu time)
-            st = time.process_time() 
+            st = time.process_time()
             self.tool.runDriftdetection(ref, cur, building_id)
 
             # End measuring CPU Usage, compute cpu in GB
@@ -196,7 +203,7 @@ class Benchmark:
             self.runtime_cpu_max = max(self.runtime_cpu_max, cpu_result)
 
         # compute average cpu
-        self.runtime_cpu_avg = cpu_sum / len(self.buildings) 
+        self.runtime_cpu_avg = cpu_sum / len(self.buildings)
 
     def runStorage(self):
         self.ram_max = 0
