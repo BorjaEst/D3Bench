@@ -1,0 +1,30 @@
+{
+    "version": "0.2",
+    "ignorePaths": [],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [
+        "Cramer",
+        "Distanz",
+        "Driftdetection",
+        "Driftdetectiontest",
+        "Epps",
+        "Gebäude",
+        "Hellinger",
+        "jensenshannon",
+        "Jenson",
+        "KOLMOGOROV",
+        "Kullback",
+        "Leibler",
+        "mannw",
+        "mises",
+        "MWURT",
+        "nannyml",
+        "smirnov",
+        "spotdiff",
+        "stattest",
+        "WASSERSTEIN"
+    ],
+    "ignoreWords": [],
+    "import": []
+}
