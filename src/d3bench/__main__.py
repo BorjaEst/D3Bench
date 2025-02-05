@@ -119,8 +119,6 @@ def run_benchmark(report_id, tool, tests, buildings, args):
             dataset = Data_Energy(f"{config.DATA_PATH}/energy_data.csv")
         case "occupancy":
             dataset = Data_Occupancy(f"{config.DATA_PATH}/occupancy_data.csv")
-        case _:
-            raise ValueError(f"Invalid dataset: {dataset}")
 
     # Run benchmark for each tool
     benchmark = Benchmark(tool, dataset, tests, buildings, args.vm)
