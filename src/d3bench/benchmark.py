@@ -1,217 +1,247 @@
+import dataclasses as dc
+import datetime as dt
 import os.path
 import time
 from datetime import datetime
-from enum import Enum
+from pathlib import Path
+from typing import Literal, Optional
 
 import pandas as pd
 from memory_profiler import memory_usage
+from pydantic import Field
 
-from d3bench import config
+from d3bench.dataset import Dataset
+from d3bench.tool import Methods, Tool
+
+# pylint: disable=too-few-public-methods
 
 
-class Criteria(Enum):
-    FUNCTIONAL = 0
-    RUNTIME = 1
-    CPU_RUNTIME = 2
-    STORAGE = 3
+Criteria = Literal["FUNCTIONAL", "RUNTIME", "CPUTIME", "MEMORY"]
+
+
+RESULTS_PATH = Path("results")
+
+
+class BenchmarkOptions:
+    """Settings to instantiate a benchmark."""
+
+    report_id: str = Field(
+        default=f"report_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        description="Report ID.",
+    )
+    buildings: set[int] = Field(
+        default={1},
+        description="List of building IDs to benchmark.",
+    )
+    criteria: set[Criteria] = Field(
+        default=set(["RUNTIME", "CPUTIME", "MEMORY"]),
+        description="List of criteria to test.",
+    )
+    vm: bool = Field(
+        default=False,
+        description="Run on a VM if set.",
+    )
+
 
 class Benchmark:
-    # Class attributes
-    runtime_avg  = 0
-    runtime_max = 0
-    runtime_cpu_avg  = 0
-    runtime_cpu_max  = 0
-    ram_avg = 0
-    ram_max = 0
+    """Class to run a benchmark to obtain Results."""
 
-    def __init__(self, tool, dataset, criterias , buildings, vm):
-        self.tool = tool
-        self.dataset = dataset
-        self.criterias = criterias
-        self.buildings = buildings
-        self.runOnVm = vm
-        self.driftDetectionStats = {}
+    def __init__(
+        self,
+        tool: Tool,
+        method: Methods,
+        ds: Dataset,
+        settings: Optional[BenchmarkOptions] = None,
+    ):
+        settings = settings or BenchmarkOptions()
+        self.tool = tool  # tool to use in the benchmark
+        self.method = method  # method to use in the benchmark
+        self.dataset = ds  # dataset to use in the benchmark
+        self.report_dir = RESULTS_PATH / settings.report_id
+        self.criteria = settings.criteria
+        self.buildings = settings.buildings
+        self.on_vm = settings.vm
 
-    def runBenchmark(self, report_id):
-        for criteria in self.criterias:
-            if criteria == Criteria.FUNCTIONAL:
-                self.runFunctional()
-            elif criteria == Criteria.RUNTIME:
-                self.runRuntime()
-            elif criteria == Criteria.CPU_RUNTIME:
-                self.runCPUruntime()
-            elif criteria == Criteria.STORAGE:
-                self.runStorage()
+    def run(self):
+        """Run the benchmark with the given parameters."""
 
-        # generate Report
-        self.__printReport(report_id)
+        # Run the benchmark for each criterion
+        report = Report()
+        for criteria in self.criteria:
+            criteria_fn[criteria](self, report)
 
-    def __printReport(self, report_id):
-        self.driftDetectionStats=pd.DataFrame.from_dict(self.driftDetectionStats)
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print("==============================")
-        name = self.tool.name
-        if self.tool.showReport:
-            name = name + " with report"
-        print("Benchmark Report: {}".format(name))
-        print("Report generated at: {}".format(current_time))
-        print("==============================")
-        for x in self.driftDetectionStats:
-            print("Gebäude {}".format(x))
-            building_stats = self.driftDetectionStats[x]
-            column_names = self.tool.column_names
+        # Return the results as report
+        return report
 
-            # Extract the drift scores and is_drifted values
-            for col in column_names:
-                drift_score = {test: stats.get(f"{col}_drift_score", stats.get("drift_score"))
-                    for test, stats in building_stats.items()
-                                if isinstance(stats, dict)}
-                is_drifted = {test: stats.get(f"{col}_is_drifted", stats.get("is_drifted"))
-                    for test, stats in building_stats.items()
-                                if isinstance(stats, dict)}
-                print(f"Column: {col}")
-                print(f"Drift Score: {drift_score}")
-                print(f"Is Drifted: {is_drifted}")
-                print()
 
-            print()
-        print("==============================")
-        print("Runtime AVG: {:.8f} milliseconds".format(self.runtime_avg))
-        print("Runtime MAX: {:.8f} milliseconds".format(self.runtime_max))
-        print("CPU Runtime AVG: {:.7f} milliseconds".format(self.runtime_cpu_avg))
-        print("CPU Runtime MAX: {:.7f} milliseconds".format(self.runtime_cpu_max))
-        print("RAM Usage AVG: {:.7f} MiB".format(self.ram_avg))
-        print("RAM Usage MAX: {:.7f} MiB".format(self.ram_max))
-        print("==============================")
+@dc.dataclass
+class Report:
+    """Class to store the results of the benchmark."""
 
-        self.__saveReport(report_id, current_time)
+    detection_stats: dict = dc.field(default_factory=dict)
+    runtime_avg: Optional[float] = None
+    runtime_max: Optional[float] = None
+    cputime_avg: Optional[float] = None
+    cputime_max: Optional[float] = None
+    ram_avg: Optional[float] = None
+    ram_max: Optional[float] = None
 
-    def __saveReport(self, report_id, current_time):
-        self.driftDetectionStats = pd.DataFrame.from_dict(self.driftDetectionStats)
-        column_names = self.tool.column_names
-        report_dir = config.RESULTS_PATH / report_id
+    def __repr__(self) -> str:
+        return (
+            "Report(\n"
+            f"\t Detection Statistics: {self.detection_stats}, \n"
+            f"\t Runtime AVG: {self.runtime_avg:.8f}, \n"
+            f"\t Runtime MAX: {self.runtime_max:.8f}, \n"
+            f"\t CPU Time AVG:{self.cputime_avg:.8f}, \n"
+            f"\t CPU Time MAX: {self.cputime_max:.8f}, \n"
+            f"\t RAM Usage AVG: {self.ram_avg:.8f}, \n"
+            f"\t RAM Usage MAX: {self.ram_max:.8f}, \n"
+            ")"
+        )
 
-        # Append data for each test to the report list
-        report_data = []
+    def as_dataframe(self) -> pd.DataFrame:
+        """Convert the report to a DataFrame."""
+        return pd.DataFrame.from_dict(self.__dict__)
 
-        for x in self.driftDetectionStats:
-            building_stats = self.driftDetectionStats[x]
 
-            # Extract the test names
-            tests = [test for test, stats in building_stats.items() if isinstance(stats, dict)]
+def run_functional(benchmark: Benchmark, report: Report):
+    """
+    Run the benchmark for the FUNCTIONAL criterion.
+    Includes the drift detection statistics in the report.
+    """
 
-            for test in tests:
-                stats = building_stats[test]
+    # Run the drift detection for each building
+    for building_id in benchmark.buildings:
 
-                # Create a dictionary to hold the row's data
-                row_data = {
-                    'time': current_time,
-                    'building': x,
-                    'tool': self.tool.name,
-                    'showReport': self.tool.showReport,
-                    'test': test,
-                    'runtime_avg': self.runtime_avg,
-                    'runtime_max': self.runtime_max,
-                    'cpu_runtime_avg': self.runtime_cpu_avg,
-                    'cpu_runtime_max': self.runtime_cpu_max,
-                    'ram_avg': self.ram_avg,
-                    'ram_max': self.ram_max,
-                    'run_on_vm': self.runOnVm,
-                }
+        # Split into reference and current dataset
+        df_train, df_test = benchmark.dataset.splitTrainTest(building_id)
+        report.detection_stats[building_id] = {}
 
-                for col in column_names:
-                    col_drift_score = f"{col}_drift_score"
-                    col_is_drifted = f"{col}_is_drifted"
+        # runDriftDetection without report generation
+        result = benchmark.tool(df_train, df_test, benchmark.method)
+        report.detection_stats[building_id].update(result)
 
-                    drift_score = stats.get(col_drift_score)
-                    is_drifted = stats.get(col_is_drifted)
 
-                    if (drift_score == None) & (is_drifted == None):
-                        row_data['all_col_drift_score'] = stats.get('drift_score')
-                        row_data['all_col_is_drifted'] = stats.get('is_drifted')
-                    else:
-                        row_data[col_drift_score] = drift_score
-                        row_data[col_is_drifted] = is_drifted
+def run_runtime(benchmark: Benchmark, report: Report):
+    """
+    Run the benchmark for the RUNTIME criterion.
+    Measure elapsed time using wall-clock time in milliseconds.
+    Includes waiting time for resources.
+    """
 
-                report_data.append(row_data)
+    # Run the drift detection for each building
+    runtimes = []
+    for building_id in benchmark.buildings:
 
-        # Create a DataFrame from the report data
-        report_df = pd.DataFrame(report_data)
+        # Split into training and test
+        df_train, df_test = benchmark.dataset.splitTrainTest(building_id)
+        st = time.time()  # TODO: timeit might be better
 
-        # Save the report to a CSV file
-        os.makedirs(report_dir, exist_ok=True)
-        report_path = report_dir / "benchmark_report.csv"
-        if os.path.exists(report_path):
-            report_df.to_csv(report_path, mode="a", index=False, header=False)
-        else:
-            report_df.to_csv(report_path, index=False)
+        # Timestamp before executing drift detection
+        _ = benchmark.tool(df_train, df_test, building_id)
 
-    def runFunctional(self):
-        for building_id in self.buildings:
-            # Split into reference and current dataset
-            ref, cur = self.dataset.splitTrainTest(building_id)
-            self.driftDetectionStats[building_id] = {}
+        # Timestamp after executing, compute runtime in ms
+        runtimes.append((time.time() - st) * 1000)
 
-            # runDriftDetection without report generation
-            my_dict = self.tool.runDriftdetection(ref, cur, building_id)
-            self.ref = ref
-            if not my_dict:
-                print("Dict from building {} is empty" .format(building_id))
-            else:
-                self.driftDetectionStats[building_id].update(my_dict)
+    # compute average and max runtimes
+    report.runtime_avg = sum(runtimes) / len(runtimes)
+    report.runtime_max = max(runtimes)
 
-    # measures elapsed time using wall-clock time (include: waiting time for resources, dependant on other processes): time in ms
-    def runRuntime(self):
-        runtime_sum = 0
-        self.runtime_max = 0
 
-        for building_id in self.buildings:
-            # Split into reference and current dataset
-            ref, cur = self.dataset.splitTrainTest(building_id)
+def run_cputime(benchmark: Benchmark, report: Report):
+    """
+    Run the benchmark for the CPUTIME criterion.
+    Measures CPU resources consumed by the process (user and system)
+    (exclude: waiting time for resources): time in ms
+    """
 
-            # Timestamp before executing drift detection
-            st = time.time()
-            self.tool.runDriftdetection(ref, cur, building_id)
+    # Run the drift detection for each building
+    runtimes = []
+    for building_id in benchmark.buildings:
 
-            # Timestamp after executing, compute runtime in ms, divided by count of algorithms of tool, result: avg runtime of 1 algorithm for 1 building
-            runtime_result = ((time.time() - st)/len(self.tool.methods))  * 1000 
-            runtime_sum += runtime_result
+        # Split into training and test
+        df_train, df_test = benchmark.dataset.splitTrainTest(building_id)
+        st = time.process_time()
 
-            # set maximal runtime
-            self.runtime_max = max(self.runtime_max, runtime_result)
+        # Start measuring CPU Usage (include user and system cpu time)
+        _ = benchmark.tool(df_train, df_test, benchmark.method)
 
-        # compute average runtime
-        self.runtime_avg = runtime_sum / len(self.buildings)
+        # End measuring CPU Usage, compute cpu in GB
+        runtimes.append((time.process_time() - st) * 1000)
 
-    # measures cpu resources (user and system) consumed by the process (exclude: waiting time for resources): time in ms
-    def runCPUruntime(self):
-        cpu_sum = 0
-        self.runtime_cpu_max = 0
-        for building_id in self.buildings:
-            ref, cur = self.dataset.splitTrainTest(building_id)
+    # compute average and max runtimes
+    report.cputime_avg = sum(runtimes) / len(runtimes)
+    report.cputime_max = max(runtimes)
 
-            # Start measuring CPU Usage (include user and system cpu time)
-            st = time.process_time()
-            self.tool.runDriftdetection(ref, cur, building_id)
 
-            # End measuring CPU Usage, compute cpu in GB
-            end = time.process_time()
-            cpu_result = ((end-st) / len(self.tool.methods)) * 1000
-            cpu_sum += cpu_result
+def run_memory(benchmark: Benchmark, report: Report):
+    """
+    Run the benchmark for the MEMORY criterion.
+    Measures RAM resources consumed by the process (user and system)
+    """
 
-            # set maximal cpu
-            self.runtime_cpu_max = max(self.runtime_cpu_max, cpu_result)
+    # Run the drift detection for each building
+    run_memories = []
+    for building_id in benchmark.buildings:
 
-        # compute average cpu
-        self.runtime_cpu_avg = cpu_sum / len(self.buildings)
+        # Split into training and test
+        df_train, df_test = benchmark.dataset.splitTrainTest(building_id)
 
-    def runStorage(self):
-        self.ram_max = 0
-        mem = []
-        for building_id in self.buildings:
-            ref, cur = self.dataset.splitTrainTest(building_id)
-            mem = mem + memory_usage((self.tool.runDriftdetection, (ref,cur,building_id)))
+        # Start measuring CPU Usage (include user and system cpu time)
+        args = (df_train, df_test, benchmark.method)
+        memory = memory_usage((benchmark.tool, args))
 
-        # compute average storage
-        self.ram_avg = sum(mem) / len(mem)
-        self.ram_max = max(mem)
+        # End measuring CPU Usage, compute cpu in GB
+        run_memories.append(memory)
+
+    # compute average and max run_memories
+    report.ram_avg = sum(run_memories) / len(run_memories)
+    report.ram_max = max(run_memories)
+
+
+criteria_fn = {
+    "FUNCTIONAL": run_functional,
+    "RUNTIME": run_runtime,
+    "CPUTIME": run_cputime,
+    "MEMORY": run_memory,
+}
+
+
+def print_report(benchmark: Benchmark, report: Report):
+    """Print the benchmark report to the console."""
+
+    # Print the benchmark data
+    print("==============================")
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    name = benchmark.tool.name
+    if benchmark.tool.show_report:
+        name = name + " with report"
+    print(f"Benchmark Report: {name}")
+    print(f"Report generated at: {current_time}")
+    print("==============================")
+
+    # Print the drift detection statistics
+    df_stats = pd.DataFrame.from_dict(report.detection_stats)
+    # TODO: print the drift detection statistics
+
+    # Print the runtime statistics
+    print("==============================")
+    print(report)
+    print("==============================")
+
+
+def save_report(benchmark: Benchmark, report: Report):
+    """Save the benchmark report to a CSV file."""
+
+    # Calculate the path from the benchmark settings
+    os.makedirs(benchmark.report_dir, exist_ok=True)
+    report_path = benchmark.report_dir / "benchmark_report.csv"
+
+    # Create DataFrames from the drift detection statistics
+    df_report = report.as_dataframe()
+
+    # Save the report to a CSV file
+    if os.path.exists(report_path):
+        df_report.to_csv(report_path, mode="a", index=False, header=False)
+    else:
+        df_report.to_csv(report_path, index=False)
