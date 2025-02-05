@@ -1,26 +1,65 @@
+import datetime as dt
+from abc import ABC, abstractmethod
+from enum import Enum
+from pathlib import Path
+from typing import Optional
+
 import numpy as np
 import pandas as pd
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
-from d3bench import config
+# pylint: disable=too-few-public-methods
 
 
-class Dataset:
+DATA_PATH = Path("data")
 
-    def __init__(self, path):
-        self.df = pd.read_csv(path)
 
+class Datasets(Enum):
+    """Enum class for benchmark datasets"""
+
+    ENERGY = "energy"
+    OCCUPANCY = "occupancy"
+
+
+class DatasetOptions(BaseSettings):
+    """Settings to instantiate a dataset."""
+
+    data_start: dt.date = Field(
+        default=dt.date(2019, 4, 1),
+        description="Start date.",
+    )
+    data_end: dt.date = Field(
+        default=dt.date(2022, 4, 1),
+        description="End date.",
+    )
+
+
+class Dataset(ABC):
+
+    file_name: str
+
+    def __init__(self, settings: Optional[DatasetOptions] = None):
+        settings = settings or DatasetOptions()
+        self.df = pd.read_csv(DATA_PATH / self.file_name)
+        self.data_start = settings.data_start
+        self.data_end = settings.data_end
+        self.preprocess()
+
+    @abstractmethod
     def preprocess(self):
-        pass
+        """Preprocess the dataset."""
+        raise NotImplementedError
 
+    @abstractmethod
     def splitTrainTest(self, building_id):
-        pass
+        """Split the dataset into reference and current sets."""
+        raise NotImplementedError
 
 
 class Data_Energy(Dataset):
 
-    def __init__(self, path):
-        super().__init__(path)
-        self.preprocess()
+    file_name = "energy_data.csv"
 
     def preprocess(self, datetime_columns=None):
 
@@ -39,8 +78,8 @@ class Data_Energy(Dataset):
         self.df = self.df[self.df["consumption"] >= 0]
 
         # Use only data defined by the config
-        self.df = self.df[self.df["time"] >= config.DATA_START_DATE]
-        self.df = self.df[self.df["time"] < config.DATA_END_DATE]
+        self.df = self.df[self.df["time"] >= str(self.data_start)]
+        self.df = self.df[self.df["time"] <= str(self.data_end)]
 
     def splitTrainTest(self, building_id):
         df_group = self.createGroup(building_id)
@@ -83,9 +122,7 @@ class Data_Energy(Dataset):
 
 class Data_Occupancy(Dataset):
 
-    def __init__(self, path):
-        super().__init__(path)
-        self.preprocess()
+    file_name = "occupancy_data.csv"
 
     def preprocess(self):
         df = self.df
