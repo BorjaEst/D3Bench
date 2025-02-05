@@ -1,19 +1,48 @@
-import os
-import pathlib
+"""Configuration settings for the d3bench package."""
+
+from typing import Literal
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from d3bench.benchmark import BenchmarkOptions
+from d3bench.dataset import DatasetOptions
+from d3bench.tool import ToolOptions
+
+# pylint: disable=too-few-public-methods
 
 
-# Default data path
-_data_path = os.getenv("DATA_PATH", "data")
-DATA_PATH = pathlib.Path(_data_path)
+LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+Dataset = Literal["energy", "occupancy"]
+Tool = Literal["Evidently", "NannyML", "Alibi-Detect"]
 
-# Default results path
-_results_path = os.getenv("RESULTS_PATH", "results")
-RESULTS_PATH = pathlib.Path(_results_path)
 
-# Default show report flag
-_show_report = os.getenv("SHOW_REPORT", "true")
-SHOW_REPORT = bool(_show_report)
+class RunSettings(BenchmarkOptions, DatasetOptions, ToolOptions):
+    """Settings to run a benchmark."""
 
-# Data datetime filter boundaries
-DATA_START_DATE = os.getenv("DATA_START_DATE", "2019-04-01")
-DATA_END_DATE = os.getenv("DATA_END_DATE", "2022-04-01")
+
+class Settings(RunSettings, BaseSettings):
+    """
+    This module provides a command-line interface to run D3Bench benchmarks.
+
+    The script allows users to specify various parameters for the benchmark,
+    including the buildings to benchmark, the criteria to test, the tools to
+    use, whether to run on a VM, the dataset to use, and the logging level.
+    """  # Description for the script help message
+
+    # Class attributes
+    model_config = SettingsConfigDict(cli_parse_args=True)
+
+    # Logging and reporting
+    log_level: LogLevel = Field(
+        default="INFO",
+        description="Logging level.",
+    )
+    tools: set[Tool] = Field(
+        default=set(["Evidently", "NannyML", "Alibi-Detect"]),
+        description="List of tools to benchmark.",
+    )
+    dataset: Dataset = Field(
+        default="energy",
+        description="Dataset to use.",
+    )

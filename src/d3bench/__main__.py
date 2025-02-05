@@ -10,56 +10,56 @@ import logging
 
 from d3bench.benchmark import Benchmark
 from d3bench.config import RunSettings, Settings
-from d3bench.dataset import Data_Energy, Data_Occupancy
-from d3bench.tool import AlibiDetect, Evidently, NannyML
+from d3bench.dataset import Data_Energy, Data_Occupancy, Dataset
+from d3bench.tool import AlibiDetect, Evidently, NannyML, Tool
 
 logger = logging.getLogger(__name__)
 
+DATASETS = {
+    "energy": Data_Energy(),
+    "occupancy": Data_Occupancy(),
+}
 
-def main(settings: Settings):
+TOOLS = {
+    "Evidently": Evidently(),
+    "NannyML": NannyML(),
+    "Alibi-Detect": AlibiDetect(),
+}
+
+
+def main(options: Settings):
     """Run the benchmark with the given arguments."""
 
     # Print benchmark start message
     print("---------Benchmark execution started---------")
 
     # Set the logging level from the arguments
-    logger.setLevel(settings.log_level)
-    logger.debug("args: %s", settings)
+    logger.setLevel(options.log_level)
+    logger.debug("args: %s", options)
+
+    # Load dataset and tools from the arguments
+    dataset = DATASETS[options.dataset]
+    tools = [TOOLS[tool] for tool in options.tools]
 
     # Run the benchmark with the given parameters
-    for tool in set(settings.tools):
+    for tool in tools:
         logger.info("Running benchmark for tool: %s", tool)
-        run_benchmark(tool, settings)
+        run_benchmark(tool, dataset, options)
 
     # Print the benchmark end message
     print("---------Benchmark execution completed---------")
 
 
-# one benchmark execution with given criteria, tools and dataset
-def run_benchmark(tool: str, settings: RunSettings):
+def run_benchmark(tool: Tool, dataset: Dataset, options: RunSettings):
     """Run benchmark with the given parameters."""
 
-    # Convert the tool name to the corresponding tool object
-    match tool:
-        case "Evidently":
-            tool = Evidently("Evidently", settings)
-        case "NannyML":
-            tool = NannyML("NannyML", settings)
-        case "AlibiDetect":
-            tool = AlibiDetect("AlibiDetect", settings)
-
-    # Convert the dataset name to the corresponding dataset object
-    match settings.dataset:
-        case "energy":
-            dataset = Data_Energy(settings)
-        case "occupancy":
-            dataset = Data_Occupancy(settings)
-
     # Run benchmark for each tool
-    benchmark = Benchmark(tool, dataset, settings)
-    benchmark.runBenchmark()
+    for method in tool.methods:
+        logger.info("Running benchmark for method: %s", method)
+        benchmark = Benchmark(tool, method, dataset, options)
+        benchmark.run()
 
 
 # Run main function if the script is executed
 if __name__ == "__main__":
-    main(Settings())
+    main(options=Settings())
