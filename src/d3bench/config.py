@@ -38,6 +38,10 @@ class Settings(RunSettings, BaseSettings):
         default="INFO",
         description="Logging level.",
     )
+    buildings: set[int] = Field(
+        default={1},
+        description="List of building IDs to benchmark.",
+    )
     tools: set[Tool] = Field(
         default=set(["Evidently", "NannyML", "Alibi-Detect"]),
         description="List of tools to benchmark.",
@@ -45,4 +49,8 @@ class Settings(RunSettings, BaseSettings):
     dataset: Dataset = Field(
         default="energy",
         description="Dataset to use.",
+    )
+    results_file: str = Field(
+        default="results.json",
+        description="File to save the results to.",
     )

@@ -15,7 +15,7 @@ from pydantic import Field
 # pylint: disable=too-few-public-methods
 
 
-class Methods(Enum):
+class Method(Enum):
     """Available methods for drift detection."""
 
     KOLMOGOROV_SMIRNOV = 0  # K-S Test
@@ -74,18 +74,18 @@ class Evidently(Tool):
 
     name = "Evidently"
     methods = {
-        Methods.WASSERSTEIN,
-        Methods.KLD,
-        Methods.PSI,
-        Methods.JSD,
-        Methods.AD,
-        Methods.CVM,
-        Methods.HD,
-        Methods.MWURT,
-        Methods.ED,
-        Methods.ES,
-        Methods.TT,
-        Methods.KOLMOGOROV_SMIRNOV,
+        Method.WASSERSTEIN,
+        Method.KLD,
+        Method.PSI,
+        Method.JSD,
+        Method.AD,
+        Method.CVM,
+        Method.HD,
+        Method.MWURT,
+        Method.ED,
+        Method.ES,
+        Method.TT,
+        Method.KOLMOGOROV_SMIRNOV,
     }
 
     def preprocess(self, args____todo):
@@ -125,38 +125,38 @@ class Evidently(Tool):
         )
         my_dict = {}
         for test in self.methods:
-            if test == Methods.WASSERSTEIN:
+            if test == Method.WASSERSTEIN:
                 my_dict["Wasserstein Distanz"] = self.run_test(
                     building_id, "wasserstein"
                 )
-            elif test == Methods.KLD:
+            elif test == Method.KLD:
                 my_dict["K-L Divergence"] = self.run_test(building_id, "kl_div")
-            elif test == Methods.PSI:
+            elif test == Method.PSI:
                 my_dict["PSI"] = self.run_test(building_id, "psi")
-            elif test == Methods.JSD:
+            elif test == Method.JSD:
                 my_dict["J-S Distance"] = self.run_test(building_id, "jensenshannon")
-            elif test == Methods.AD:
+            elif test == Method.AD:
                 my_dict["Anderson-Darling"] = self.run_test(building_id, "anderson")
-            elif test == Methods.CVM:
+            elif test == Method.CVM:
                 my_dict["Cramer-von-Mises"] = self.run_test(
                     building_id, "cramer_von_mises"
                 )
-            elif test == Methods.HD:
+            elif test == Method.HD:
                 my_dict["Hellinger-Distance"] = self.run_test(building_id, "hellinger")
-            elif test == Methods.MWURT:
+            elif test == Method.MWURT:
                 my_dict["Mann-Whitney U-Rank Test"] = self.run_test(
                     building_id, "mannw"
                 )
-            elif test == Methods.ED:
+            elif test == Method.ED:
                 my_dict["Energy-Distance"] = self.run_test(building_id, "ed")
-            elif test == Methods.ES:
+            elif test == Method.ES:
                 try:
                     my_dict["Epps-Singleton"] = self.run_test(building_id, "es")
                 except:
                     my_dict["Epps-Singleton"] = "no result"
-            elif test == Methods.TT:
+            elif test == Method.TT:
                 my_dict["T-Test"] = self.run_test(building_id, "t_test")
-            elif test == Methods.KOLMOGOROV_SMIRNOV:
+            elif test == Method.KOLMOGOROV_SMIRNOV:
                 my_dict["K-S Test"] = self.run_test(building_id, "ks")
 
         return my_dict
@@ -188,10 +188,10 @@ class NannyML(Tool):
 
     name = "NannyML"
     methods = {
-        Methods.KOLMOGOROV_SMIRNOV,
-        Methods.WASSERSTEIN,
-        Methods.JSD,
-        Methods.HD,
+        Method.KOLMOGOROV_SMIRNOV,
+        Method.WASSERSTEIN,
+        Method.JSD,
+        Method.HD,
     }
 
     def preprocess(self):
@@ -215,15 +215,15 @@ class NannyML(Tool):
 
         my_dict = {}
         for test in self.methods:
-            if test == Methods.KOLMOGOROV_SMIRNOV:
+            if test == Method.KOLMOGOROV_SMIRNOV:
                 my_dict["K-S Test"] = self.run_test(building_id, "kolmogorov_smirnov")
-            elif test == Methods.WASSERSTEIN:
+            elif test == Method.WASSERSTEIN:
                 my_dict["Wasserstein Distance"] = self.run_test(
                     building_id, "wasserstein"
                 )
-            elif test == Methods.JSD:
+            elif test == Method.JSD:
                 my_dict["J-S Distance"] = self.run_test(building_id, "jensen_shannon")
-            elif test == Methods.HD:
+            elif test == Method.HD:
                 my_dict["Hellinger-Distance"] = self.run_test(building_id, "hellinger")
 
         return my_dict
@@ -278,9 +278,9 @@ class AlibiDetect(Tool):
 
     name = "AlibiDetect"
     methods = {
-        Methods.KOLMOGOROV_SMIRNOV,
-        Methods.CVM,
-        Methods.SPOTDIFF,
+        Method.KOLMOGOROV_SMIRNOV,
+        Method.CVM,
+        Method.SPOTDIFF,
     }
 
     def preprocess(self):
@@ -301,11 +301,11 @@ class AlibiDetect(Tool):
 
         my_dict = {}
         for test in self.methods:
-            if test == Methods.KOLMOGOROV_SMIRNOV:
+            if test == Method.KOLMOGOROV_SMIRNOV:
                 my_dict["K-S Test"] = self.run_test("kolmogorov_smirnov")
-            elif test == Methods.CVM:
+            elif test == Method.CVM:
                 my_dict["Cramer-von-Mises"] = self.run_test("cramer_von_mises")
-            elif test == Methods.SPOTDIFF:
+            elif test == Method.SPOTDIFF:
                 my_dict["Spot-the-diff"] = self.run_test("spotdiff")
 
         return my_dict

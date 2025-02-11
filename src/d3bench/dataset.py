@@ -2,7 +2,7 @@ import datetime as dt
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -12,6 +12,7 @@ from pydantic_settings import BaseSettings
 # pylint: disable=too-few-public-methods
 
 
+Data = Tuple[pd.DataFrame, pd.DataFrame]
 DATA_PATH = Path("data")
 
 
@@ -51,8 +52,12 @@ class Dataset(ABC):
         """Preprocess the dataset."""
         raise NotImplementedError
 
+    def __call__(self, building_id):
+        """Return the dataset for the given building."""
+        return self.split_data(building_id)
+
     @abstractmethod
-    def splitTrainTest(self, building_id):
+    def split_data(self, building_id):
         """Split the dataset into reference and current sets."""
         raise NotImplementedError
 
