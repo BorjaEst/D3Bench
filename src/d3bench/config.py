@@ -43,7 +43,8 @@ class Settings(RunSettings, BaseSettings):
         description="List of building IDs to benchmark.",
     )
     tools: set[Tool] = Field(
-        default=set(["Evidently", "NannyML", "Alibi-Detect"]),
+        # default=set(["Evidently", "NannyML", "Alibi-Detect"]),
+        default=set(["Evidently"]),
         description="List of tools to benchmark.",
     )
     dataset: Dataset = Field(
@@ -51,6 +52,6 @@ class Settings(RunSettings, BaseSettings):
         description="Dataset to use.",
     )
     results_file: str = Field(
-        default="results.json",
+        default="results.csv",
         description="File to save the results to.",
     )

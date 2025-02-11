@@ -62,7 +62,7 @@ class Dataset(ABC):
         raise NotImplementedError
 
 
-class Data_Energy(Dataset):
+class DataEnergy(Dataset):
 
     file_name = "energy_data.csv"
 
@@ -86,8 +86,8 @@ class Data_Energy(Dataset):
         self.df = self.df[self.df["time"] >= str(self.data_start)]
         self.df = self.df[self.df["time"] <= str(self.data_end)]
 
-    def splitTrainTest(self, building_id):
-        df_group = self.createGroup(building_id)
+    def split_data(self, building_id):
+        df_group = self.create_group(building_id)
         boundary = "04-01-2020 00:00"
 
         # Split dataset into train and test
@@ -101,17 +101,10 @@ class Data_Energy(Dataset):
         test_set.index = pd.to_datetime(test_set.index)
         test_set = test_set.groupby(pd.Grouper(freq="h")).sum()
 
+        # Return train and test sets
         return train_set, test_set
 
-    def returnBuilding(self, building_id):
-        df_group = self.createGroup(building_id)
-        df_group = df_group.set_index("time")
-        df_group.index = pd.to_datetime(df_group.index)
-        df_group = df_group.groupby(pd.Grouper(freq="h")).sum()
-
-        return df_group
-
-    def createGroup(self, building_id):
+    def create_group(self, building_id):
         df = self.df
         df_group = df[df["ids"] == building_id]
         num_wrongs = np.sum(df_group["consumption"] < 0)
@@ -125,7 +118,7 @@ class Data_Energy(Dataset):
         return df_group
 
 
-class Data_Occupancy(Dataset):
+class DataOccupancy(Dataset):
 
     file_name = "occupancy_data.csv"
 
@@ -137,7 +130,7 @@ class Data_Occupancy(Dataset):
 
         # self.df = self.df.drop(columns=['Unnamed: 0'], axis=1)
 
-    def splitTrainTest(self, building_id):
+    def split_data(self, building_id):
         df_group = self.df
         df_group["time"] = pd.to_datetime(df_group["time"])
         boundary = pd.to_datetime("05-09-2021 00:00")

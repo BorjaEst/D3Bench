@@ -3,13 +3,14 @@ import logging
 import time
 import timeit
 from pathlib import Path
-from typing import Literal, Optional, Tuple
+from typing import Any, Literal, Optional
 
 import numpy as np
 import pandas as pd
 from memory_profiler import memory_usage
 from pydantic import Field
 
+from d3bench.dataset import Data
 from d3bench.tool import Method, Tool
 
 # pylint: disable=too-few-public-methods
@@ -42,13 +43,13 @@ class Benchmark:
         self,
         building_id: int,
         tool: Tool,
-        data: Tuple[pd.DataFrame, pd.DataFrame],
+        data: Data,
         settings: Optional[BenchmarkOptions] = None,
     ):
         settings = settings or BenchmarkOptions()
         self.building_id = building_id
         self.tool = tool
-        self.data = {"train": data[0], "test": data[1]}
+        self.data = data
         self.criteria = settings.criteria
         self.on_vm = settings.vm
 
@@ -57,8 +58,13 @@ class Benchmark:
 
         # Prepare the job for the benchmark
         logger.debug("Prep. benchmark job %s", (method, self.tool))
-        df_train, df_test = self.data["train"], self.data["test"]
-        job = Job(self.tool, method, df_train, df_test)
+        job = Job(self.tool, method, self.data)
+
+        # Train the detector before running the benchmark
+        try:  # Raise NotImplementedError if tool has no training call
+            job.fit()  # train the detector
+        except NotImplementedError:
+            logger.debug("Skipping training for %s", self.tool)
 
         # Prepare report for the benchmark
         logger.debug("Prep. benchmark report")
@@ -77,13 +83,29 @@ class Benchmark:
 class Job:
     """Class to run a benchmark job with the given parameters."""
 
-    def __init__(self, tool, method, df_train, df_test):
-        self.arguments = (method, df_train, df_test)
+    def __init__(self, tool: Tool, method: Method, data: Data):
+        # Prepare the job for the benchmark, copy to avoid side effects
+        self.df_reference = data[0].copy()
+        self.df_test = data[1].copy()
+        self.job_store: dict[str, Any] = {}
         self.tool = tool
+        self.method = method
+        tool.preprocess(self.df_reference, store=self.job_store)
+        tool.preprocess(self.df_test, store=self.job_store)
+        tool.setup(method, store=self.job_store)
 
-    def __call__(self):
+    def fit(self) -> None:
         """Run the benchmark with the given parameters."""
-        return self.tool(*self.arguments)
+        self.tool.fit(self.df_reference, self.job_store)
+
+    def test(self) -> None:
+        """Run the benchmark with the given parameters."""
+        self.tool.test(self.df_test, self.job_store)
+
+    @property
+    def report(self) -> dict[str, Any]:
+        """Return the report of the benchmark."""
+        return self.tool.postprocess(self.job_store)
 
 
 @dc.dataclass
@@ -136,8 +158,11 @@ def run_functional(job: Job, report: Report):
     """
 
     # Run the drift detection and store the results
-    result = job()
-    report.detection_stats.update(result)
+    job.test()  # run the test
+    report.detection_stats.update(job.report)
+
+    # Save report of drift detection
+    pass  # TODO: save the report
 
 
 def run_runtime(job: Job, report: Report):
@@ -148,7 +173,8 @@ def run_runtime(job: Job, report: Report):
     """
 
     # Create a runtime timer
-    timer = timeit.Timer(job, timer=time.time)
+    # TODO: Future implementation for time training phase
+    timer = timeit.Timer(job.test, timer=time.time)
 
     # Time runtimes measurements
     _runtimes = timer.repeat(repeat=report.repetitions, number=1)
@@ -168,7 +194,8 @@ def run_cputime(job: Job, report: Report):
     """
 
     # Create a runtime timer
-    timer = timeit.Timer(job, timer=time.process_time)
+    # TODO: Future implementation for time training phase
+    timer = timeit.Timer(job.test, timer=time.process_time)
 
     # Time runtimes measurements
     _runtimes = timer.repeat(repeat=report.repetitions, number=1)
@@ -187,8 +214,11 @@ def run_memory(job: Job, report: Report):
     """
 
     # Run the drift detection for each building
-    _runmems = [memory_usage(job) for _ in range(report.repetitions)]
-    run_memories = np.array(_runmems, dtype=float)
+    # TODO: Future implementation for time training phase
+    rmem = [memory_usage(job.test) for _ in range(report.repetitions)]
+
+    # Memory in run as the maximum memory used during the run
+    run_memories = np.array([max(mem) for mem in rmem], dtype=float)
 
     # Compute statistics
     report.ram_avg = run_memories.mean()

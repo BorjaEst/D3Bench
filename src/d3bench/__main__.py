@@ -7,28 +7,35 @@ whether to run on a VM, the dataset to use, and the logging level.
 """
 
 import logging
+from pathlib import Path
+
+import pandas as pd
+from rich import print  # pylint: disable=redefined-builtin
 
 from d3bench.benchmark import Benchmark, Report
 from d3bench.config import RunSettings, Settings
-from d3bench.dataset import Data_Energy, Data_Occupancy, Dataset, Data
+from d3bench.dataset import Data, DataEnergy, DataOccupancy, Dataset
 from d3bench.tool import AlibiDetect, Evidently, NannyML, Tool
 
 logger = logging.getLogger(__name__)
 
 DATASETS = {
-    "energy": Data_Energy(),
-    "occupancy": Data_Occupancy(),
+    "energy": DataEnergy(),
+    "occupancy": DataOccupancy(),
 }
 
 TOOLS = {
     "Evidently": Evidently(),
-    "NannyML": NannyML(),
-    "Alibi-Detect": AlibiDetect(),
+    # "NannyML": NannyML(),
+    # "Alibi-Detect": AlibiDetect(),
 }
 
 
 def main(options: Settings):
     """Run the benchmark with the given arguments."""
+
+    # Run the benchmark with the given parameters
+    print("------ Benchmark script started -------------")
 
     # Set the logging level from the arguments
     logger.setLevel(options.log_level)
@@ -40,18 +47,18 @@ def main(options: Settings):
     tools = [TOOLS[tool] for tool in options.tools]
 
     # Run the benchmark with the given parameters
-    print("---------Benchmark execution started---------")
+    print("------ Benchmark execution in progress ------")
     results = run_buildings(buildings, tools, dataset, options)
-
-    # Print the benchmark end message
-    print("---------Benchmark execution completed-------")
 
     # Print the results to the console
     print(results)
 
     # Save the results to a file
-    if options.save_results:
-        save_results(results, options)
+    output = Path("results") / options.results_file
+    pd.DataFrame(results).to_csv(output, index=False)
+
+    # Print the benchmark end message
+    print("---------Benchmark execution completed-------")
 
 
 def run_buildings(
@@ -101,21 +108,6 @@ def run_methods(
 
     # Return results
     return results
-
-
-def print_results(results: list[Report]) -> None:
-    """Print the benchmark results to the console."""
-
-    # Print results to the console
-    print(results)  # TODO: Format the results with rich
-
-
-def save_results(results: list[Report], options: Settings) -> None:
-    """Save the benchmark results to a file."""
-
-    # Save results to a file
-    with open(options.results_file, "w", encoding="utf-8") as file:
-        file.write(str(results))
 
 
 # Run main function if the script is executed

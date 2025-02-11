@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
-import nannyml as nml  # pip install nannyml
+import nannyml as nml
 import numpy as np
-import pandas as pd  # pip install pandas
+import pandas as pd
 from alibi_detect.cd import CVMDrift, KSDrift, SpotTheDiffDrift
 from evidently.metric_preset import DataDriftPreset
 
 # from evidently.metrics import *
-from evidently.report import Report
+from evidently.report import Report as EvidentlyReport
 from pydantic import Field
 
 # pylint: disable=too-few-public-methods
@@ -18,19 +18,19 @@ from pydantic import Field
 class Method(Enum):
     """Available methods for drift detection."""
 
-    KOLMOGOROV_SMIRNOV = 0  # K-S Test
-    WASSERSTEIN = 1  # Wasserstein Distance Normed
-    KLD = 2  # Kullback-Leibler divergence
-    PSI = 3  # Population Stability Index
-    JSD = 4  # Jenson-Shannon Distance
-    AD = 5  # Anderson-Darling
-    CVM = 6  # Cramer-von-Mises
-    HD = 7  # Hellinger distance
-    MWURT = 8  # Mann-Whitney U-Rank Test
-    ED = 9  # Energy-distance
-    ES = 10  # Epps-Singleton
-    TT = 11  # T-Test
-    SPOTDIFF = 12  # Spot-The-Difference Test
+    KOLMOGOROV_SMIRNOV = "K-S Test"
+    WASSERSTEIN = "Wasserstein Distanz"
+    KLD = "K-L Divergence"
+    PSI = "PSI"
+    JSD = "J-S Distance"
+    AD = "Anderson-Darling"
+    CVM = "Cramer-von-Mises"
+    HD = "Hellinger-Distance"
+    MWURT = "Mann-Whitney U-Rank Test"
+    ED = "Energy-Distance"
+    ES = "Epps-Singleton"
+    TT = "T-Test"
+    SPOTDIFF = "Spot-The-Difference Test"
 
 
 class ToolOptions:
@@ -47,25 +47,35 @@ class Tool(ABC):
 
     # Abstract attribute to define by child class
     name: str = ""
-    methods: set = set()
+    methods: dict[Method, str] = {}
 
     def __init__(self, settings: Optional[ToolOptions] = None):
         settings = settings or ToolOptions()
         self.show_report = settings.show_report
 
     @abstractmethod
-    def __call__(self, df_train, df_test, method):
-        """Run drift detection on the reference and current data."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def preprocess(self, df_reference, df_current):
+    def preprocess(self, df: pd.DataFrame, store: dict[str, Any]) -> None:
         """Preprocess the data before drift detection."""
         raise NotImplementedError
 
     @abstractmethod
-    def run_test(self, building_id, test):
-        """Run a specific drift detection test."""
+    def setup(self, method: Method, store: dict[str, Any]) -> None:
+        """Setup the drift detection method."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def fit(self, df_reference: pd.DataFrame, store: dict[str, Any]) -> None:
+        """Run drift detection on the reference and current data."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def test(self, df_test: pd.DataFrame, store: dict[str, Any]) -> None:
+        """Run drift detection on the reference and current data."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def postprocess(self, store: dict[str, Any]) -> dict[str, Any]:
+        """Postprocess the drift detection results."""
         raise NotImplementedError
 
 
@@ -74,113 +84,45 @@ class Evidently(Tool):
 
     name = "Evidently"
     methods = {
-        Method.WASSERSTEIN,
-        Method.KLD,
-        Method.PSI,
-        Method.JSD,
-        Method.AD,
-        Method.CVM,
-        Method.HD,
-        Method.MWURT,
-        Method.ED,
-        Method.ES,
-        Method.TT,
-        Method.KOLMOGOROV_SMIRNOV,
+        Method.WASSERSTEIN: "wasserstein",
+        Method.KLD: "kl_div",
+        # Method.PSI: "psi",
+        # Method.JSD: "jensenshannon",
+        # Method.AD: "anderson",
+        # Method.CVM: "cramer_von_mises",
+        # Method.HD: "hellinger",
+        # Method.MWURT: "mannw",
+        # Method.ED: "ed",
+        # Method.ES: "es",
+        # Method.TT: "t_test",
+        # Method.KOLMOGOROV_SMIRNOV: "ks",
     }
 
-    def preprocess(self, args____todo):
-        """Preprocess the data before drift detection."""
+    def preprocess(self, df: pd.DataFrame, store: dict[str, Any]) -> None:
+        if "consumption" in df:
+            df.rename(columns={"consumption": "target"}, inplace=True)
+            df.drop(columns={"ids"}, inplace=True)
+            df.reset_index(drop=True, inplace=True)
+            df["target"] = pd.to_numeric(df["target"])
+            df["temp_outside"] = pd.to_numeric(df["temp_outside"])
+        if "prob_predicted" in df:
+            df.drop(columns={"prob_predicted", "predicted"}, inplace=True)
 
-        # Make a copy of the dataframes
-        df_reference, df_current = dataset.splitTrainTest(building_id)
-        df_reference, df_current = df_reference.copy(), df_current.copy()
+    def setup(self, method: Method, store: dict[str, Any]) -> None:
+        metrics = [DataDriftPreset(stattest=self.methods[method])]
+        store["report"] = EvidentlyReport(metrics)
 
-        # If the column names are different, rename them
-        if "consumption" in df_reference:
-            # Rename the consumption column to target
-            df_reference.rename(columns={"consumption": "target"}, inplace=True)
-            df_current.rename(columns={"consumption": "target"}, inplace=True)
-            # Drop the ids column
-            df_reference.drop(columns={"ids"}, inplace=True)
-            df_current.drop(columns={"ids"}, inplace=True)
-            # Reset the index
-            df_reference.reset_index(drop=True, inplace=True)
-            df_current.reset_index(drop=True, inplace=True)
-            # Convert the columns to numeric
-            df_reference["target"] = pd.to_numeric(df_reference["target"])
-            df_reference["temp_outside"] = pd.to_numeric(df_reference["temp_outside"])
+    def fit(self, df_reference: pd.DataFrame, store: dict[str, Any]) -> None:
+        # There is no train method separated from the test method in Evidetly
+        store["df_reference"] = df_reference
+        raise NotImplementedError("Evidently does not have a train method")
 
-        # If the columns are probabilities, drop them
-        if "prob_predicted" in df_reference:
-            # Drop the predicted and probability columns
-            df_reference.drop(columns={"prob_predicted", "predicted"}, inplace=True)
-            df_current.drop(columns={"prob_predicted", "predicted"}, inplace=True)
+    def test(self, df_test: pd.DataFrame, store: dict[str, Any]) -> None:
+        report, df_reference = store["report"], store["df_reference"]
+        report.run(reference_data=df_reference, current_data=df_test)
 
-        # Return the column names and the dataframes
-        return list(df_reference.columns), df_reference, df_current
-
-    def __call__(self, df_reference, df_current, building_id):
-        column_names, df_reference, df_current = self.preprocess(
-            df_reference, df_current
-        )
-        my_dict = {}
-        for test in self.methods:
-            if test == Method.WASSERSTEIN:
-                my_dict["Wasserstein Distanz"] = self.run_test(
-                    building_id, "wasserstein"
-                )
-            elif test == Method.KLD:
-                my_dict["K-L Divergence"] = self.run_test(building_id, "kl_div")
-            elif test == Method.PSI:
-                my_dict["PSI"] = self.run_test(building_id, "psi")
-            elif test == Method.JSD:
-                my_dict["J-S Distance"] = self.run_test(building_id, "jensenshannon")
-            elif test == Method.AD:
-                my_dict["Anderson-Darling"] = self.run_test(building_id, "anderson")
-            elif test == Method.CVM:
-                my_dict["Cramer-von-Mises"] = self.run_test(
-                    building_id, "cramer_von_mises"
-                )
-            elif test == Method.HD:
-                my_dict["Hellinger-Distance"] = self.run_test(building_id, "hellinger")
-            elif test == Method.MWURT:
-                my_dict["Mann-Whitney U-Rank Test"] = self.run_test(
-                    building_id, "mannw"
-                )
-            elif test == Method.ED:
-                my_dict["Energy-Distance"] = self.run_test(building_id, "ed")
-            elif test == Method.ES:
-                try:
-                    my_dict["Epps-Singleton"] = self.run_test(building_id, "es")
-                except:
-                    my_dict["Epps-Singleton"] = "no result"
-            elif test == Method.TT:
-                my_dict["T-Test"] = self.run_test(building_id, "t_test")
-            elif test == Method.KOLMOGOROV_SMIRNOV:
-                my_dict["K-S Test"] = self.run_test(building_id, "ks")
-
-        return my_dict
-
-    def run_test(self, building_id, test):
-        # create TargetDriftReport in dict
-        report = Report(metrics=[DataDriftPreset(stattest=test)])
-        report.run(reference_data=self.ref, current_data=self.cur)
-        if self.showReport:
-            file_name = "evidently_report_{}_{}.html".format(building_id, test)
-            report.save_html(file_name)
-        report_dict = report.as_dict()
-
-        # add into dictionary
-        my_dict = {}
-        for col in self.column_names:
-            my_dict[f"{col}_drift_score"] = report_dict["metrics"][1]["result"][
-                "drift_by_columns"
-            ][col]["drift_score"]
-            my_dict[f"{col}_is_drifted"] = report_dict["metrics"][1]["result"][
-                "drift_by_columns"
-            ][col]["drift_detected"]
-
-        return my_dict
+    def postprocess(self, store: dict[str, Any]) -> dict[str, Any]:
+        return store["report"].as_dict()
 
 
 class NannyML(Tool):
