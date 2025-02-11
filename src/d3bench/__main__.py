@@ -26,7 +26,7 @@ DATASETS = {
 
 TOOLS = {
     "Evidently": Evidently(),
-    # "NannyML": NannyML(),
+    "NannyML": NannyML(),
     # "Alibi-Detect": AlibiDetect(),
 }
 

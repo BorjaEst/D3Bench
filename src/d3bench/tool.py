@@ -84,8 +84,9 @@ class Evidently(Tool):
 
     name = "Evidently"
     methods = {
+        Method.KOLMOGOROV_SMIRNOV: "ks",
         Method.WASSERSTEIN: "wasserstein",
-        Method.KLD: "kl_div",
+        # Method.KLD: "kl_div",
         # Method.PSI: "psi",
         # Method.JSD: "jensenshannon",
         # Method.AD: "anderson",
@@ -95,7 +96,6 @@ class Evidently(Tool):
         # Method.ED: "ed",
         # Method.ES: "es",
         # Method.TT: "t_test",
-        # Method.KOLMOGOROV_SMIRNOV: "ks",
     }
 
     def preprocess(self, df: pd.DataFrame, store: dict[str, Any]) -> None:
@@ -130,90 +130,56 @@ class NannyML(Tool):
 
     name = "NannyML"
     methods = {
-        Method.KOLMOGOROV_SMIRNOV,
-        Method.WASSERSTEIN,
-        Method.JSD,
-        Method.HD,
+        Method.KOLMOGOROV_SMIRNOV: "kolmogorov_smirnov",
+        Method.WASSERSTEIN: "wasserstein",
+        Method.JSD: "jensen_shannon",
+        Method.HD: "hellinger",
+    }
+    thresholds = {  # TODO: Check if individual thresholds improves runtime
+        "kolmogorov_smirnov": nml.thresholds.StandardDeviationThreshold(
+            std_lower_multiplier=None,
+        ),
+        "jensen_shannon": nml.thresholds.ConstantThreshold(
+            upper=0.1,
+        ),
+        "wasserstein": nml.thresholds.StandardDeviationThreshold(
+            std_lower_multiplier=None,
+        ),
+        "hellinger": nml.thresholds.ConstantThreshold(
+            upper=0.1,
+        ),
     }
 
-    def preprocess(self):
-        if "temp_outside" in self.ref:
-            self.ref = self.ref.drop(columns={"ids"})
-            self.cur = self.cur.drop(columns={"ids"})
-        if "prob_predicted" in self.ref:
-            self.ref = self.ref.drop(columns={"prob_predicted", "predicted"})
-            self.cur = self.cur.drop(columns={"prob_predicted", "predicted"})
-        self.ref["time"] = self.ref.index
-        self.ref = self.ref.reset_index(drop=True)
-        self.cur["time"] = self.cur.index
-        self.cur = self.cur.reset_index(drop=True)
-        self.column_names = [col for col in self.ref.columns if col != "time"]
+    def preprocess(self, df: pd.DataFrame, store: dict[str, Any]) -> None:
+        if "temp_outside" in df:
+            df.drop(columns={"ids"}, inplace=True)
+        if "prob_predicted" in df:
+            df.drop(columns={"prob_predicted", "predicted"}, inplace=True)
+        df["time"] = df.index
+        df.reset_index(drop=True, inplace=True)
+        if "column_names" not in store:
+            store["column_names"] = list(df)
 
-    # @profile
-    def __call__(self, ref, cur, building_id):
-        self.ref = ref
-        self.cur = cur
-        self.preprocess()
-
-        my_dict = {}
-        for test in self.methods:
-            if test == Method.KOLMOGOROV_SMIRNOV:
-                my_dict["K-S Test"] = self.run_test(building_id, "kolmogorov_smirnov")
-            elif test == Method.WASSERSTEIN:
-                my_dict["Wasserstein Distance"] = self.run_test(
-                    building_id, "wasserstein"
-                )
-            elif test == Method.JSD:
-                my_dict["J-S Distance"] = self.run_test(building_id, "jensen_shannon")
-            elif test == Method.HD:
-                my_dict["Hellinger-Distance"] = self.run_test(building_id, "hellinger")
-
-        return my_dict
-
-    # calculates drift score based on chunks
-    # drift score is the mean of all chunks
-    # is_drifted is the mean of True/False depending on the threshold, computed to %
-    # @profile
-    def run_test(self, building_id, test):
-        calc = nml.UnivariateDriftCalculator(
-            column_names=self.column_names,
+    def setup(self, method: Method, store: dict[str, Any]) -> None:
+        store["detector"] = nml.UnivariateDriftCalculator(
+            column_names=store["column_names"],
             timestamp_column_name="time",
-            continuous_methods=[test],
-            thresholds={
-                "kolmogorov_smirnov": nml.thresholds.StandardDeviationThreshold(
-                    std_lower_multiplier=None
-                ),
-                "jensen_shannon": nml.thresholds.ConstantThreshold(upper=0.1),
-                "wasserstein": nml.thresholds.StandardDeviationThreshold(
-                    std_lower_multiplier=None
-                ),
-                "hellinger": nml.thresholds.ConstantThreshold(upper=0.1),
-            },
+            continuous_methods=[self.methods[method]],
+            thresholds=self.thresholds,
         )
 
-        calc.fit(self.ref)
-        results = calc.calculate(self.cur)
-        df = results.filter(period="analysis", column_names=self.column_names).to_df()
+    def fit(self, df_reference: pd.DataFrame, store: dict[str, Any]) -> None:
+        store["detector"].fit(df_reference)
 
-        if self.showReport:
-            figure = results.filter(
-                column_names=results.continuous_column_names, methods=[test]
-            ).plot(kind="distribution")
-            figure.write_image(f"nannyml_report_dist_{building_id}_{test}.svg")
-            figure = results.filter(
-                column_names=results.continuous_column_names, methods=[test]
-            ).plot(kind="drift")
-            figure.write_image(f"nannyml_report_drift_{building_id}_{test}.svg")
+    def test(self, df_test: pd.DataFrame, store: dict[str, Any]) -> None:
+        store["results"] = store["detector"].calculate(df_test)
 
-        # add into dictionary
-        my_dict = {}
-        for col in self.column_names:
-            my_dict[f"{col}_drift_score"] = df[col][test]["value"].mean()
-            my_dict[f"{col}_is_drifted"] = (
-                str(round(df[col][test]["alert"].mean() * 100, 1)) + " % drifted"
-            )
-
-        return my_dict
+    def postprocess(self, store: dict[str, Any]) -> dict[str, Any]:
+        return (
+            store["results"]
+            .filter(period="analysis", column_names=store["column_names"])
+            .to_dict()
+        )
 
 
 class AlibiDetect(Tool):

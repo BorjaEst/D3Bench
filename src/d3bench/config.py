@@ -44,7 +44,7 @@ class Settings(RunSettings, BaseSettings):
     )
     tools: set[Tool] = Field(
         # default=set(["Evidently", "NannyML", "Alibi-Detect"]),
-        default=set(["Evidently"]),
+        default=set(["Evidently", "NannyML"]),
         description="List of tools to benchmark.",
     )
     dataset: Dataset = Field(

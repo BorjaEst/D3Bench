@@ -87,7 +87,7 @@ class DataEnergy(Dataset):
         self.df = self.df[self.df["time"] <= str(self.data_end)]
 
     def split_data(self, building_id):
-        df_group = self.create_group(building_id)
+        df_group = self._create_group(building_id)
         boundary = "04-01-2020 00:00"
 
         # Split dataset into train and test
@@ -104,7 +104,7 @@ class DataEnergy(Dataset):
         # Return train and test sets
         return train_set, test_set
 
-    def create_group(self, building_id):
+    def _create_group(self, building_id):
         df = self.df
         df_group = df[df["ids"] == building_id]
         num_wrongs = np.sum(df_group["consumption"] < 0)
