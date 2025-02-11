@@ -2,7 +2,7 @@ import datetime as dt
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Literal
 
 import numpy as np
 import pandas as pd
@@ -12,7 +12,9 @@ from pydantic_settings import BaseSettings
 # pylint: disable=too-few-public-methods
 
 
+Dataset = Literal["energy", "occupancy"]
 Data = Tuple[pd.DataFrame, pd.DataFrame]
+
 DATA_PATH = Path("data")
 
 
@@ -36,7 +38,7 @@ class DatasetOptions(BaseSettings):
     )
 
 
-class Dataset(ABC):
+class BaseDataset(ABC):
 
     file_name: str
 
@@ -62,7 +64,7 @@ class Dataset(ABC):
         raise NotImplementedError
 
 
-class DataEnergy(Dataset):
+class DataEnergy(BaseDataset):
 
     file_name = "energy_data.csv"
 
@@ -118,7 +120,7 @@ class DataEnergy(Dataset):
         return df_group
 
 
-class DataOccupancy(Dataset):
+class DataOccupancy(BaseDataset):
 
     file_name = "occupancy_data.csv"
 

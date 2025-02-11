@@ -1,4 +1,5 @@
 import dataclasses as dc
+import datetime as dt
 import logging
 import time
 import timeit
@@ -11,7 +12,7 @@ from memory_profiler import memory_usage
 from pydantic import Field
 
 from d3bench.dataset import Data
-from d3bench.tool import Method, Tool
+from d3bench.tool import Framework, Method, Tool
 
 # pylint: disable=too-few-public-methods
 
@@ -68,7 +69,8 @@ class Benchmark:
 
         # Prepare report for the benchmark
         logger.debug("Prep. benchmark report")
-        report = Report(method, self.building_id, self.on_vm)
+        framework = self.tool.name  # tool used in the benchmark
+        report = Report(framework, method, self.building_id, self.on_vm)
 
         # Run the benchmark for each criterion
         logger.debug("Running benchmark for %s", self.criteria)
@@ -124,10 +126,11 @@ class Report:
     rather than statistics.
     """
 
+    framework: Framework  # tool used in the benchmark
     test_method: Method  # method used in the benchmark
     building_id: int  # building ID used in the benchmark
     run_on_vm: bool = False  # run on a VM
-    time: float = time.time()  # timestamp of the report
+    time: dt.datetime = dt.datetime.now()  # time of the benchmark
     repetitions: int = 10  # number of repetitions
     runtime_avg: Optional[float] = None
     runtime_max: Optional[float] = None

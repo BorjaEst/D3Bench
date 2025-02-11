@@ -6,15 +6,13 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from d3bench.benchmark import BenchmarkOptions
-from d3bench.dataset import DatasetOptions
-from d3bench.tool import ToolOptions
+from d3bench.dataset import DatasetOptions, Dataset
+from d3bench.tool import ToolOptions, Framework
 
 # pylint: disable=too-few-public-methods
 
 
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-Dataset = Literal["energy", "occupancy"]
-Tool = Literal["Evidently", "NannyML", "Alibi-Detect"]
 
 
 class RunSettings(BenchmarkOptions, DatasetOptions, ToolOptions):
@@ -42,7 +40,7 @@ class Settings(RunSettings, BaseSettings):
         default={1},
         description="List of building IDs to benchmark.",
     )
-    tools: set[Tool] = Field(
+    tools: set[Framework] = Field(
         # default=set(["Evidently", "NannyML", "Alibi-Detect"]),
         default=set(["Evidently", "NannyML"]),
         description="List of tools to benchmark.",

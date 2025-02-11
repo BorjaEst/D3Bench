@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from enum import Enum
-from typing import Any, Optional
+from enum import Enum, StrEnum
+from typing import Any, Literal, Optional
 
 import nannyml as nml
 import numpy as np
@@ -13,9 +13,10 @@ from evidently.report import Report as EvidentlyReport
 from pydantic import Field
 
 # pylint: disable=too-few-public-methods
+Framework = Literal["Evidently", "NannyML", "Alibi-Detect"]
 
 
-class Method(Enum):
+class Method(StrEnum):
     """Available methods for drift detection."""
 
     KOLMOGOROV_SMIRNOV = "K-S Test"
@@ -46,7 +47,7 @@ class Tool(ABC):
     """Abstract class for drift detection tools."""
 
     # Abstract attribute to define by child class
-    name: str = ""
+    name: Framework
     methods: dict[Method, str] = {}
 
     def __init__(self, settings: Optional[ToolOptions] = None):

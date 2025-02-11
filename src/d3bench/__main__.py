@@ -14,7 +14,7 @@ from rich import print  # pylint: disable=redefined-builtin
 
 from d3bench.benchmark import Benchmark, Report
 from d3bench.config import RunSettings, Settings
-from d3bench.dataset import Data, DataEnergy, DataOccupancy, Dataset
+from d3bench.dataset import BaseDataset, Data, DataEnergy, DataOccupancy
 from d3bench.tool import AlibiDetect, Evidently, NannyML, Tool
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,10 @@ def main(options: Settings):
 
 
 def run_buildings(
-    buildings: set[int], tools: list[Tool], ds: Dataset, options: RunSettings
+    buildings: set[int],
+    tools: list[Tool],
+    ds: BaseDataset,
+    options: RunSettings,
 ) -> list[Report]:
     """Run the benchmarks for the given buildings."""
 
@@ -77,7 +80,10 @@ def run_buildings(
 
 
 def run_tools(
-    building_id: int, tools: list[Tool], data: Data, options: RunSettings
+    building_id: int,
+    tools: list[Tool],
+    data: Data,
+    options: RunSettings,
 ) -> list[Report]:
     """Run the benchmarks for the given tool."""
 
@@ -92,7 +98,10 @@ def run_tools(
 
 
 def run_methods(
-    building_id: int, tool: Tool, data: Data, options: RunSettings
+    building_id: int,
+    tool: Tool,
+    data: Data,
+    options: RunSettings,
 ) -> list[Report]:
     """Run benchmark methods with the given parameters."""
 
