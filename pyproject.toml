@@ -28,3 +28,7 @@ repository = "https://github.com/mohamedyd/D3Bench"
 changelog = "https://your_project_changelog_url"
 issue_tracker = "https://github.com/mohamedyd/D3Bench/issues"
 source = "https://github.com/mohamedyd/D3Bench"
+
+
+[tool.mypy]
+ignore_missing_imports = true

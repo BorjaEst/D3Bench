@@ -87,22 +87,22 @@ class Job:
 
     def __init__(self, tool: Tool, method: Method, data: Data):
         # Prepare the job for the benchmark, copy to avoid side effects
-        self.df_reference = data[0].copy()
-        self.df_test = data[1].copy()
         self.job_store: dict[str, Any] = {}
         self.tool = tool
         self.method = method
-        tool.preprocess(self.df_reference, store=self.job_store)
-        tool.preprocess(self.df_test, store=self.job_store)
         tool.setup(method, store=self.job_store)
+        self.data = {
+            "reference": tool.preprocess(data[0].copy(), self.job_store),
+            "test": tool.preprocess(data[1].copy(), self.job_store),
+        }
 
     def fit(self) -> None:
         """Run the benchmark with the given parameters."""
-        self.tool.fit(self.df_reference, self.job_store)
+        self.tool.fit(self.data["reference"], self.job_store)
 
     def test(self) -> None:
         """Run the benchmark with the given parameters."""
-        self.tool.test(self.df_test, self.job_store)
+        self.tool.test(self.data["test"], self.job_store)
 
     @property
     def report(self) -> dict[str, Any]:

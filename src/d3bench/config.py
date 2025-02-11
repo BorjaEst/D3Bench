@@ -41,8 +41,7 @@ class Settings(RunSettings, BaseSettings):
         description="List of building IDs to benchmark.",
     )
     tools: set[Framework] = Field(
-        # default=set(["Evidently", "NannyML", "Alibi-Detect"]),
-        default=set(["Evidently", "NannyML"]),
+        default=set(["Evidently", "NannyML", "Alibi-Detect"]),
         description="List of tools to benchmark.",
     )
     dataset: Dataset = Field(
