@@ -15,19 +15,23 @@ from rich.logging import RichHandler
 
 import d3bench.dataset
 import d3bench.tools
-from d3bench.benchmark import Benchmark, Report
-from d3bench.config import RunSettings, Settings
-from d3bench.dataset import BaseDataset, Data
+from d3bench.benchmark import Benchmark, BenchmarkOptions, Report
+from d3bench.config import Settings
+from d3bench.dataset import Data, Dataset, DatasetOptions
 from d3bench.tools import Tool
 
 logger = logging.getLogger(__name__)
 
-DATASETS = {
-    "energy": d3bench.dataset.DataEnergy(),
-    "occupancy": d3bench.dataset.DataOccupancy(),
+DATASETS: dict[str, Dataset] = {
+    "energy": d3bench.dataset.DataEnergy(
+        settings=DatasetOptions(buildings={1}),
+    ),
+    # "occupancy": d3bench.dataset.DataOccupancy(
+    #    settings=DatasetOptions(),
+    # ),
 }
 
-TOOLS = {
+TOOLS: dict[str, Tool] = {
     "Frouros": d3bench.tools.Frouros(),
     # "Evidently": d3bench.tools.Evidently(),
     # "NannyML": d3bench.tools.NannyML(),
@@ -49,13 +53,12 @@ def main(options: Settings):
 
     # Load dataset and tools from the arguments
     logger.debug("Call arguments: %s", options)
-    buildings = options.buildings
-    dataset = DATASETS[options.dataset]
+    data = DATASETS[options.dataset]()
     tools = [TOOLS[tool] for tool in options.tools]
 
     # Run the benchmark with the given parameters
     print("------ Benchmark execution in progress ------")
-    results = run_buildings(buildings, tools, dataset, options)
+    results = run_tools(tools, data, options)
 
     # Print the results to the console
     print(results)
@@ -68,29 +71,8 @@ def main(options: Settings):
     print("---------Benchmark execution completed-------")
 
 
-def run_buildings(
-    buildings: set[int],
-    tools: list[Tool],
-    ds: BaseDataset,
-    options: RunSettings,
-) -> list[Report]:
-    """Run the benchmarks for the given buildings."""
-
-    # Run the benchmark for each building
-    results = []
-    for building_id in buildings:
-        logger.info("Running benchmarks for building: %s", building_id)
-        results += run_tools(building_id, tools, ds(building_id), options)
-
-    # Return the results
-    return results
-
-
-def run_tools(
-    building_id: int,
-    tools: list[Tool],
-    data: Data,
-    options: RunSettings,
+def run_tools(  # fmt: skip
+    tools: list[Tool], data: Data, options: BenchmarkOptions
 ) -> list[Report]:
     """Run the benchmarks for the given tool."""
 
@@ -98,31 +80,9 @@ def run_tools(
     results = []
     for tool in tools:
         logger.info("Running benchmarks for tool: %s", tool)
-        results += run_methods(building_id, tool, data, options)
+        results += list(Benchmark(tool, data, options))
 
     # Return the results
-    return results
-
-
-def run_methods(
-    building_id: int,
-    tool: Tool,
-    data: Data,
-    options: RunSettings,
-) -> list[Report]:
-    """Run benchmark methods with the given parameters."""
-
-    # Prepare benchmark for tool and data
-    logger.info("Preparing benchmark for tool: %s", tool)
-    benchmark = Benchmark(building_id, tool, data, options)
-
-    # Run benchmark for each tool
-    results = []
-    for method in tool.methods:
-        logger.info("Running benchmark for method: %s", method)
-        results.append(benchmark(method))
-
-    # Return results
     return results
 
 

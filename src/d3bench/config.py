@@ -6,9 +6,9 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from d3bench.benchmark import BenchmarkOptions
-from d3bench.dataset import Dataset, DatasetOptions
+from d3bench.dataset import DatasetOptions
 from d3bench.tools import ToolOptions
-from d3bench.utils import Framework
+from d3bench.utils import Dataset, Framework
 
 # pylint: disable=too-few-public-methods
 
@@ -36,10 +36,6 @@ class Settings(RunSettings, BaseSettings):
     log_level: LogLevel = Field(
         default="INFO",
         description="Logging level.",
-    )
-    buildings: set[int] = Field(
-        default={1},
-        description="List of building IDs to benchmark.",
     )
     tools: set[Framework] = Field(
         default=set(["Frouros", "Evidently", "NannyML", "Alibi-Detect"]),

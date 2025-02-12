@@ -37,24 +37,21 @@ class Tool(ABC):
         """Preprocess the data before drift detection."""
         raise NotImplementedError
 
+    def __getitem__(self, name):
+        return self.methods[name]
+
 
 class Frouros(Tool):
     """Frouros drift detection tool."""
 
     name = "Frouros"
     methods = {
-        Method.KOLMOGOROV_SMIRNOV: frouros.KSWIN,
+        # Method.KOLMOGOROV_SMIRNOV: frouros.KSWIN,
         Method.CVM: frouros.CVMTest,
         # TODO: Add the rest of the methods
     }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        if "consumption" in df:
-            df.rename(columns={"consumption": "target"}, inplace=True)
-            df.drop(columns={"ids"}, inplace=True)
-            df.reset_index(drop=True, inplace=True)
-            df["target"] = pd.to_numeric(df["target"])
-            df["temp_outside"] = pd.to_numeric(df["temp_outside"])
-        if "prob_predicted" in df:
-            df.drop(columns={"prob_predicted", "predicted"}, inplace=True)
+        df.drop(columns={"ids", "time"}, inplace=True)
+        df["target"] = pd.to_numeric(df["target"])
         return df

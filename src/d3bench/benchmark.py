@@ -1,29 +1,23 @@
 """Module to run a benchmark to obtain Results."""
 
-import dataclasses as dc
-import datetime as dt
 import logging
 import time
 import timeit
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Optional
 
 import numpy as np
-import pandas as pd
 from memory_profiler import memory_usage
 from pydantic import Field
 
 from d3bench.dataset import Data
 from d3bench.tools import Tool
-from d3bench.utils import Framework, Method, Result
+from d3bench.utils import Criteria, Method, Report, Result
 
 # pylint: disable=too-few-public-methods
 
 
 logger = logging.getLogger(__name__)
-Criteria = Literal["FUNCTIONAL", "RUNTIME", "CPUTIME", "MEMORY"]
-
-
 RESULTS_PATH = Path("results")
 
 
@@ -45,24 +39,29 @@ class Benchmark:
 
     def __init__(
         self,
-        building_id: int,
         tool: Tool,
         data: Data,
         settings: Optional[BenchmarkOptions] = None,
     ):
         settings = settings or BenchmarkOptions()
-        self.building_id = building_id
         self.tool = tool
-        self.data = data
+        self.x_reference = data[0]
+        self.x_test = data[1]
         self.criteria = settings.criteria
         self.on_vm = settings.vm
+
+    def __iter__(self):
+        """Run the benchmark with the given parameters."""
+        for method in self.tool.methods:
+            logger.debug("Running benchmark for %s", method)
+            yield self(method)
 
     def __call__(self, method: Method):
         """Run the benchmark with the given parameters."""
 
         # Prepare the job for the benchmark
         logger.debug("Prep. benchmark job %s", (method, self.tool))
-        job = Job(self.tool, method, self.data)
+        job = Job(self.tool, method, benchmark=self)
 
         # Train the detector before running the benchmark
         try:  # Raise NotImplementedError if tool has no training call
@@ -73,7 +72,8 @@ class Benchmark:
         # Prepare report for the benchmark
         logger.debug("Prep. benchmark report")
         framework = self.tool.name  # tool used in the benchmark
-        report = Report(framework, method, self.building_id, self.on_vm)
+        n_points = self.x_reference.shape[0]  # number of points in the dataset
+        report = Report(framework, method, n_points, self.on_vm)
 
         # Run the benchmark for each criterion
         logger.debug("Running benchmark for %s", self.criteria)
@@ -88,10 +88,13 @@ class Benchmark:
 class Job:
     """Class to run a benchmark job with the given parameters."""
 
-    def __init__(self, tool: Tool, method: Method, data: Data):
+    def __init__(  # fmt: skip
+        self, tool: Tool, method: Method, benchmark: Benchmark
+    ) -> None:
         # Prepare the job for the benchmark, copy to avoid side effects
-        self.x_reference = tool.preprocess(data[0].copy())
-        self.x_test = tool.preprocess(data[1].copy())
+        self.x_reference = tool.preprocess(benchmark.x_reference.copy())
+        self.x_test = tool.preprocess(benchmark.x_test.copy())
+        self.benchmark = benchmark
         self.detector = tool[method]()
 
     def fit(self) -> None:
@@ -108,49 +111,6 @@ class Job:
         return self.detector.result()
 
 
-@dc.dataclass
-class Report:
-    """Class to store the results of the benchmark.
-
-    Note It’s tempting to calculate mean and standard deviation from the
-    result vector and report these. However, this is not very useful. In
-    a typical case, the lowest value gives a lower bound for how fast your
-    machine can run the given code snippet; higher values in the result
-    vector are typically not caused by variability in Python’s speed, but
-    by other processes interfering with your timing accuracy. So the min()
-    of the result is probably the only number you should be interested in.
-
-    After that, you should look at the entire vector and apply common sense
-    rather than statistics.
-    """
-
-    framework: Framework  # tool used in the benchmark
-    test_method: Method  # method used in the benchmark
-    building_id: int  # building ID used in the benchmark
-    run_on_vm: bool = False  # run on a VM
-    time: dt.datetime = dt.datetime.now()  # time of the benchmark
-    repetitions: int = 10  # number of repetitions
-    runtime_avg: Optional[float] = None
-    runtime_max: Optional[float] = None
-    runtime_min: Optional[float] = None
-    cputime_avg: Optional[float] = None
-    cputime_max: Optional[float] = None
-    cputime_min: Optional[float] = None
-    ram_avg: Optional[float] = None
-    ram_max: Optional[float] = None
-    ram_min: Optional[float] = None
-    p_value: Optional[float] = None
-    drift_detected: Optional[bool] = None
-
-    def __repr__(self) -> str:
-        # TODO: improve with rich
-        return f"{self.__class__.__name__}({self.__dict__})"
-
-    def as_dataframe(self) -> pd.DataFrame:
-        """Convert the report to a DataFrame."""
-        return pd.DataFrame.from_dict(self.__dict__)
-
-
 def run_functional(job: Job, report: Report):
     """
     Run the benchmark for the FUNCTIONAL criterion.
@@ -159,10 +119,15 @@ def run_functional(job: Job, report: Report):
 
     # Run the drift detection and store the results
     job.test()  # run the test
-    report.detection_stats.update(job.report)
 
     # Save report of drift detection
     pass  # TODO: save the report
+
+    # Collect the results of the drift detection
+    result = job.result
+    report.drift_detected = result.drift_detected
+    report.p_value = result.p_value
+    report.statistic = result.statistic
 
 
 def run_runtime(job: Job, report: Report):
