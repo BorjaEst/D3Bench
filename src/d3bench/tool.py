@@ -4,6 +4,8 @@ from typing import Any, Literal, Optional
 
 import evidently.metric_preset
 import evidently.report
+import frouros.detectors.concept_drift
+import frouros.detectors.data_drift
 import nannyml as nml
 import numpy.typing as npt
 import pandas as pd
@@ -11,7 +13,7 @@ from alibi_detect import cd
 from pydantic import Field
 
 # pylint: disable=too-few-public-methods
-Framework = Literal["Evidently", "NannyML", "Alibi-Detect"]
+Framework = Literal["Frouros", "Evidently", "NannyML", "Alibi-Detect"]
 
 
 class Method(StrEnum):
@@ -46,7 +48,7 @@ class Tool(ABC):
 
     # Abstract attribute to define by child class
     name: Framework
-    methods: dict[Method, str] = {}
+    methods: dict[Method, Any] = {}
 
     def __init__(self, settings: Optional[ToolOptions] = None):
         settings = settings or ToolOptions()
@@ -76,6 +78,53 @@ class Tool(ABC):
     def postprocess(self, store: dict[str, Any]) -> dict[str, Any]:
         """Postprocess the drift detection results."""
         raise NotImplementedError
+
+
+class Frouros(Tool):
+    """Frouros drift detection tool."""
+
+    name = "Frouros"
+    methods = {
+        Method.KOLMOGOROV_SMIRNOV: frouros.detectors.concept_drift.KSWIN,
+        Method.CVM: frouros.detectors.data_drift.CVMTest,
+        # TODO: Add the rest of the methods
+    }
+    call_type = {
+        Method.KOLMOGOROV_SMIRNOV: "update",
+        Method.CVM: "compare",
+    }
+
+    def preprocess(self, df: pd.DataFrame, store: dict[str, Any]) -> Any:
+        if "consumption" in df:
+            df.rename(columns={"consumption": "target"}, inplace=True)
+            df.drop(columns={"ids"}, inplace=True)
+            df.reset_index(drop=True, inplace=True)
+            df["target"] = pd.to_numeric(df["target"])
+            df["temp_outside"] = pd.to_numeric(df["temp_outside"])
+        if "prob_predicted" in df:
+            df.drop(columns={"prob_predicted", "predicted"}, inplace=True)
+        return df
+
+    def setup(self, method: Method, store: dict[str, Any]) -> None:
+        store["detector"] = self.methods[method]()
+        store["api-call"] = getattr(store["detector"], self.call_type[method])
+
+    def fit(self, x_reference: pd.DataFrame, store: dict[str, Any]) -> None:
+        try:
+            store["detector"].fit(X=x_reference)
+        except AttributeError as err:
+            raise NotImplementedError() from err
+
+    def test(self, x_test: pd.DataFrame, store: dict[str, Any]) -> None:
+        store["results"] = store["api-call"](x_test)
+
+    def postprocess(self, store: dict[str, Any]) -> dict[str, Any]:
+        if store["results"] == {}:
+            return store["detector"].status
+        if isinstance(store["results"], dict):
+            return store["results"]
+        raise RuntimeError("Unexpected results from Frouros")
+
 
 
 class Evidently(Tool):

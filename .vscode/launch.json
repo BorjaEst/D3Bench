@@ -10,7 +10,11 @@
             "type": "debugpy",
             "request": "launch",
             "module": "d3bench",
-            "args": [ ],
+            "args": [ 
+                "--log_level=DEBUG",
+                "--criteria=[FUNCTIONAL,RUNTIME,CPUTIME,MEMORY]",
+                "--tools=[Frouros]"
+            ],
         }
     ]
 }

@@ -13,7 +13,12 @@ readme = "README.md"
 dynamic = ["version", "dependencies"]
 
 [project.optional-dependencies]
-full = ["evidently~=0.6.1", "nannyml~=0.13.0", "alibi-detect[all]~=0.12.0"]
+full = [
+    "evidently~=0.6.1",
+    "nannyml~=0.13.0",
+    "alibi-detect[all]~=0.12.0",
+    "frouros~=0.9.0",
+]
 
 
 [tool.setuptools.dynamic]
