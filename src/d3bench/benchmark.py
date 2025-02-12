@@ -90,11 +90,11 @@ class Job:
         self.job_store: dict[str, Any] = {}
         self.tool = tool
         self.method = method
-        tool.setup(method, store=self.job_store)
         self.data = {
             "reference": tool.preprocess(data[0].copy(), self.job_store),
             "test": tool.preprocess(data[1].copy(), self.job_store),
         }
+        tool.setup(method, store=self.job_store)
 
     def fit(self) -> None:
         """Run the benchmark with the given parameters."""
