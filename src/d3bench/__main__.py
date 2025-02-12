@@ -13,24 +13,25 @@ import pandas as pd
 from rich import print  # pylint: disable=redefined-builtin
 from rich.logging import RichHandler
 
-from d3bench import dataset, tool
+import d3bench.dataset
+import d3bench.tools
 from d3bench.benchmark import Benchmark, Report
 from d3bench.config import RunSettings, Settings
 from d3bench.dataset import BaseDataset, Data
-from d3bench.tool import Tool
+from d3bench.tools import Tool
 
 logger = logging.getLogger(__name__)
 
 DATASETS = {
-    "energy": dataset.DataEnergy(),
-    "occupancy": dataset.DataOccupancy(),
+    "energy": d3bench.dataset.DataEnergy(),
+    "occupancy": d3bench.dataset.DataOccupancy(),
 }
 
 TOOLS = {
-    "Frouros": tool.Frouros(),
-    "Evidently": tool.Evidently(),
-    "NannyML": tool.NannyML(),
-    "Alibi-Detect": tool.AlibiDetect(),
+    "Frouros": d3bench.tools.Frouros(),
+    # "Evidently": d3bench.tools.Evidently(),
+    # "NannyML": d3bench.tools.NannyML(),
+    # "Alibi-Detect": d3bench.tools.AlibiDetect(),
 }
 
 
@@ -49,7 +50,7 @@ def main(options: Settings):
     # Load dataset and tools from the arguments
     logger.debug("Call arguments: %s", options)
     buildings = options.buildings
-    dataset = DATASETS[options.dataset]  # pylint: disable=W0621
+    dataset = DATASETS[options.dataset]
     tools = [TOOLS[tool] for tool in options.tools]
 
     # Run the benchmark with the given parameters

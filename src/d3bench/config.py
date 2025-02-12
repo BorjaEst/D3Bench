@@ -6,8 +6,9 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from d3bench.benchmark import BenchmarkOptions
-from d3bench.dataset import DatasetOptions, Dataset
-from d3bench.tool import ToolOptions, Framework
+from d3bench.dataset import Dataset, DatasetOptions
+from d3bench.tools import ToolOptions
+from d3bench.utils import Framework
 
 # pylint: disable=too-few-public-methods
 

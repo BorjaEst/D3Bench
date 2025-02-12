@@ -6,7 +6,7 @@ import logging
 import time
 import timeit
 from pathlib import Path
-from typing import Any, Literal, Optional
+from typing import Literal, Optional
 
 import numpy as np
 import pandas as pd
@@ -14,7 +14,8 @@ from memory_profiler import memory_usage
 from pydantic import Field
 
 from d3bench.dataset import Data
-from d3bench.tool import Framework, Method, Tool
+from d3bench.tools import Tool
+from d3bench.utils import Framework, Method, Result
 
 # pylint: disable=too-few-public-methods
 
@@ -89,27 +90,22 @@ class Job:
 
     def __init__(self, tool: Tool, method: Method, data: Data):
         # Prepare the job for the benchmark, copy to avoid side effects
-        self.job_store: dict[str, Any] = {}
-        self.tool = tool
-        self.method = method
-        self.data = {
-            "reference": tool.preprocess(data[0].copy(), self.job_store),
-            "test": tool.preprocess(data[1].copy(), self.job_store),
-        }
-        tool.setup(method, store=self.job_store)
+        self.x_reference = tool.preprocess(data[0].copy())
+        self.x_test = tool.preprocess(data[1].copy())
+        self.detector = tool[method]()
 
     def fit(self) -> None:
         """Run the benchmark with the given parameters."""
-        self.tool.fit(self.data["reference"], self.job_store)
+        self.detector.fit(self.x_reference)
 
     def test(self) -> None:
         """Run the benchmark with the given parameters."""
-        self.tool.test(self.data["test"], self.job_store)
+        self.detector.test(self.x_test)
 
     @property
-    def report(self) -> dict[str, Any]:
-        """Return the report of the benchmark."""
-        return self.tool.postprocess(self.job_store)
+    def result(self) -> Result:
+        """Return the result of the test."""
+        return self.detector.result()
 
 
 @dc.dataclass
@@ -143,9 +139,8 @@ class Report:
     ram_avg: Optional[float] = None
     ram_max: Optional[float] = None
     ram_min: Optional[float] = None
-    drift_score: Optional[float] = None
+    p_value: Optional[float] = None
     drift_detected: Optional[bool] = None
-    detection_stats: dict = dc.field(default_factory=dict)
 
     def __repr__(self) -> str:
         # TODO: improve with rich
