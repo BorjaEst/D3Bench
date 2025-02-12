@@ -136,20 +136,6 @@ class NannyML(Tool):
         # Method.JSD: "jensen_shannon",
         # Method.HD: "hellinger",
     }
-    thresholds = {  # TODO: Check if individual thresholds improves runtime
-        "kolmogorov_smirnov": nml.thresholds.StandardDeviationThreshold(
-            std_lower_multiplier=None,
-        ),
-        "jensen_shannon": nml.thresholds.ConstantThreshold(
-            upper=0.1,
-        ),
-        "wasserstein": nml.thresholds.StandardDeviationThreshold(
-            std_lower_multiplier=None,
-        ),
-        "hellinger": nml.thresholds.ConstantThreshold(
-            upper=0.1,
-        ),
-    }
 
     def preprocess(self, df: pd.DataFrame, store: dict[str, Any]) -> Any:
         if "temp_outside" in df:
@@ -158,16 +144,15 @@ class NannyML(Tool):
             df.drop(columns={"prob_predicted", "predicted"}, inplace=True)
         df["time"] = df.index
         df.reset_index(drop=True, inplace=True)
-        if "column_names" not in store:
-            store["column_names"] = df.columns
+        if "features" not in store:
+            store["features"] = df.columns.drop("time")
         return df
 
     def setup(self, method: Method, store: dict[str, Any]) -> None:
         store["detector"] = nml.UnivariateDriftCalculator(
-            column_names=store["column_names"],
+            column_names=store["features"],
             timestamp_column_name="time",
             continuous_methods=[self.methods[method]],
-            thresholds=self.thresholds,
         )
 
     def fit(self, x_reference: pd.DataFrame, store: dict[str, Any]) -> None:
@@ -179,7 +164,8 @@ class NannyML(Tool):
     def postprocess(self, store: dict[str, Any]) -> dict[str, Any]:
         return (
             store["results"]
-            .filter(period="analysis", column_names=store["column_names"])
+            .filter(period="analysis", column_names=store["features"])
+            .to_df()
             .to_dict()
         )
 
@@ -199,7 +185,6 @@ class AlibiDetect(Tool):
             df.drop(columns={"prob_predicted", "predicted"}, inplace=True)
         if "consumption" in df:
             df.drop(columns={"ids"}, inplace=True)
-        store["column_names"] = df.columns
         return df.to_numpy()
 
     def setup(self, method: Method, store: dict[str, Any]) -> None:
@@ -213,4 +198,4 @@ class AlibiDetect(Tool):
         store["results"] = store["detector"].predict(x_test, **options)
 
     def postprocess(self, store: dict[str, Any]) -> dict[str, Any]:
-        return store["results"]["data"].to_dict()
+        return store["results"]["data"]

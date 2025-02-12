@@ -1,3 +1,5 @@
+"""Module to run a benchmark to obtain Results."""
+
 import dataclasses as dc
 import datetime as dt
 import logging
