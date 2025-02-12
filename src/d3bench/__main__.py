@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 from rich import print  # pylint: disable=redefined-builtin
+from rich.logging import RichHandler
 
 from d3bench.benchmark import Benchmark, Report
 from d3bench.config import RunSettings, Settings
@@ -38,10 +39,13 @@ def main(options: Settings):
     print("------ Benchmark script started -------------")
 
     # Set the logging level from the arguments
-    logger.setLevel(options.log_level)
-    logger.debug("args: %s", options)
+    logging.basicConfig(
+        handlers=[RichHandler(rich_tracebacks=True)],
+        level=options.log_level,
+    )
 
     # Load dataset and tools from the arguments
+    logger.debug("Call arguments: %s", options)
     buildings = options.buildings
     dataset = DATASETS[options.dataset]
     tools = [TOOLS[tool] for tool in options.tools]
