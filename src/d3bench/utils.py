@@ -6,7 +6,11 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 from typing import Any, Literal, Optional
 
-import pandas as pd
+import numpy as np
+
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-few-public-methods
+
 
 # Define the available frameworks
 Framework = Literal[
@@ -51,8 +55,26 @@ class Method(StrEnum):
 
 
 @dc.dataclass
-class Report:
-    """Class to store the results of the benchmark.
+class TestInformation:
+    """Information about the test method used in the benchmark."""
+
+    framework: Framework  # tool used in the benchmark
+    run_on_vm: bool  # run on a VM
+    repetitions: int  # number of repetitions
+
+
+@dc.dataclass
+class Results:  # pylint: disable=too-few-public-methods
+    """Result of the test method."""
+
+    drift_detected: Optional[bool] = None
+    p_values: Optional[list[float]] = None
+    statistics: Optional[list[float]] = None
+
+
+@dc.dataclass
+class Stats:
+    """Statistics of the benchmark.
 
     Note It’s tempting to calculate mean and standard deviation from the
     result vector and report these. However, this is not very useful. In
@@ -66,45 +88,65 @@ class Report:
     rather than statistics.
     """
 
-    framework: Framework  # tool used in the benchmark
-    test_method: Method  # method used in the benchmark
-    len_testdata: int  # number of points in the test dataset
-    run_on_vm: bool = False  # run on a VM
-    time: dt.datetime = dt.datetime.now()  # time of the benchmark
-    repetitions: int = 10  # number of repetitions
-    runtime_avg: Optional[float] = None
-    runtime_max: Optional[float] = None
-    runtime_min: Optional[float] = None
-    cputime_avg: Optional[float] = None
-    cputime_max: Optional[float] = None
-    cputime_min: Optional[float] = None
-    ram_avg: Optional[float] = None
-    ram_max: Optional[float] = None
-    ram_min: Optional[float] = None
-    drift_detected: Optional[bool] = None
-    p_value: Optional[float] = None
-    statistic: Optional[float] = None
+    avg: float  # Average value
+    max: float  # Maximum value
+    min: float  # Minimum value
 
-    def __repr__(self) -> str:
-        # TODO: improve with rich
-        return f"{self.__class__.__name__}({self.__dict__})"
-
-    def as_dataframe(self) -> pd.DataFrame:
-        """Convert the report to a DataFrame."""
-        return pd.DataFrame.from_dict(self.__dict__)
+    def __init__(self, values: list[float | int]) -> None:
+        values_array = np.array(values)
+        self.avg = values_array.mean()
+        self.max = values_array.max()
+        self.min = values_array.min()
 
 
 @dc.dataclass
-class Result:  # pylint: disable=too-few-public-methods
-    """Result of the test method."""
+class DataInformation:
+    """Information about the data used to benchmark."""
 
-    drift_detected: Optional[bool] = None
-    p_value: Optional[float] = None
-    statistic: Optional[float] = None
+    len_traindata: int
+    len_testdata: int
+
+
+DetectorType = Literal["Concept drift", "Data drift", "Virtual drift"]
+OperationType = Literal["Streaming", "Batch"]
+
+
+@dc.dataclass
+class DetectorInformation:
+    """Information about the detector used in the benchmark."""
+
+    multi_features: bool  # Detector supports dim>1
+    fit_method: bool  # Detector has a fit method
+    detector_type: DetectorType  # Detector type
+    operation_type: OperationType  # Detector operation
+
+
+@dc.dataclass
+class Report:
+    """Class to store the results of the benchmark."""
+
+    test_information: TestInformation  # information about the test method
+    method: Method  # method used in the benchmark
+    detector_info: DetectorInformation  # information about the detector
+    data_info: DataInformation  # information about the data used
+    time: dt.datetime = dt.datetime.now()  # time of the benchmark
+    runtime: Optional[Stats] = None  # runtime statistics
+    cputime: Optional[Stats] = None  # runtime statistics
+    ram: Optional[Stats] = None  # runtime statistics
+    results: Optional[Results] = None  # results of method
 
 
 class BaseTestMethod(ABC):
     """Base class for the test methods."""
+
+    @property
+    @abstractmethod
+    def info(self) -> DetectorInformation:
+        """Return the information of the detector."""
+
+    @abstractmethod
+    def __init__(self, n_features: int) -> None:
+        """Initialize the test method."""
 
     @abstractmethod
     def fit(self, x_reference: Any) -> None:
@@ -115,5 +157,5 @@ class BaseTestMethod(ABC):
         """Run the test on the test data."""
 
     @abstractmethod
-    def result(self) -> Result:
+    def result(self) -> dict[str, Any]:
         """Return the result of the test."""
