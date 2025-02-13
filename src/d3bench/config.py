@@ -46,6 +46,6 @@ class Settings(RunSettings, BaseSettings):
         description="Dataset to use.",
     )
     results_file: str = Field(
-        default="results.csv",
+        default="results.json",
         description="File to save the results to.",
     )
