@@ -2,9 +2,8 @@ import datetime as dt
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Tuple, Literal
+from typing import Optional, Tuple
 
-import numpy as np
 import pandas as pd
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -26,10 +25,6 @@ class Datasets(Enum):
 class DatasetOptions(BaseSettings):
     """Settings to instantiate a dataset."""
 
-    buildings: Optional[set[int]] = Field(
-        default=None,
-        description="List of buildings to use.",
-    )
     data_start: dt.date = Field(
         default=dt.date(2019, 4, 1),
         description="Start date.",
@@ -39,7 +34,7 @@ class DatasetOptions(BaseSettings):
         description="End date.",
     )
     boundary: dt.date = Field(
-        default=dt.date(2020, 4, 1),
+        default=dt.date(2022, 1, 1),
         description="Boundary date.",
     )
 
@@ -48,65 +43,57 @@ class Dataset(ABC):
     """Abstract class for the datasets."""
 
     file_name: str
+    measure_columns: list[str]
 
     def __init__(self, settings: Optional[DatasetOptions] = None):
         settings = settings or DatasetOptions()
-        self.df = pd.read_csv(DATA_PATH / self.file_name)
-        self.buildings = settings.buildings
+        self.df: pd.DataFrame = pd.read_csv(DATA_PATH / self.file_name)
+        self.df["time"] = self.preprocess_time()
         self.data_start = settings.data_start
         self.data_end = settings.data_end
+        self.filter_data()  # Remove data out of limits
         self.boundary = settings.boundary
-        self.preprocess()
-        self.x_reference, self.x_test = self.split_data()
 
     @abstractmethod
-    def preprocess(self):
-        """Preprocess the dataset."""
-        raise NotImplementedError
+    def preprocess_time(self) -> pd.DataFrame:
+        """Returns the dataset with a datetime column."""
 
-    def __call__(self):
+    def filter_data(self) -> None:
+        """Remove columns and rows not used in the benchmark."""
+        nan_rows = self.df[self.measure_columns].isna()
+        self.df = self.df[~nan_rows.any(axis=1)]  # rm rows with nan
+        self.df = self.df[self.df["time"] >= str(self.data_start)]
+        self.df = self.df[self.df["time"] <= str(self.data_end)]
+
+    def split_data(self) -> Data:
         """Return the dataset for the given building."""
-        return self.split_data()
-
-    @abstractmethod
-    def split_data(self):
-        """Split the dataset into reference and current sets."""
-        raise NotImplementedError
+        boundary_timestamp = pd.Timestamp(self.boundary)
+        train_filter = self.df["time"] < boundary_timestamp
+        return self.df[train_filter], self.df[~train_filter]
 
 
 class DataEnergy(Dataset):
     """Class for the energy dataset."""
 
     file_name = "energy_data.csv"
+    datetime_columns = ["year", "month", "day", "hour"]
+    consumption_unit = "MWh"
+    temperature_unit = "°C"  # TODO: Check if it is correct
+    measure_columns = ["consumption", "temp_outside"]
 
-    def preprocess(self):
-        # Merge date and time columns to datetime column
-        datetime_columns = ["year", "month", "day", "hour"]
-        self.df["time"] = pd.to_datetime(self.df[datetime_columns])
-        self.df = self.df.drop(columns=datetime_columns)
+    def __init__(self, building_id: int, *args, **kwds):
+        super().__init__(*args, **kwds)
+        self.df = self.df[self.df["ids"] == building_id]
+        self.purpose_of_use = self.df["purpose_of_use"].iloc
+        self.gross_area = self.df["gross_area"].iloc[0]
+        self.floor_area = self.df["floor_area"].iloc[0]
+        self.apartment_sector = self.df["apartment_sector"].iloc[0]
+        self.total_volume = self.df["total_volume"].iloc[0]
+        self.building_type = self.df["building_type"].iloc[0]
+        self.building_id = self.df["ids"].iloc[0]
+        self.df = self.df[self.measure_columns + ["time"]]
 
-        # Drop duplicates, sort and reset index
-        self.df.drop_duplicates(subset=["ids", "time"], inplace=True)
-        self.df.sort_values(by=["ids", "time"], inplace=True)
-        self.df.reset_index(drop=True, inplace=True)
-
-        # Drop rows with building ids not in the list
-        self.df = self.df[self.df["ids"].isin(self.buildings)]
-
-        # Drop non used columns and negative consumption values
-        self.df = self.df[["ids", "time", "consumption"]]
-        self.df = self.df[self.df["consumption"] >= 0]
-        self.df.rename(columns={"consumption": "target"}, inplace=True)
-
-        # Use only data defined by the config
-        self.df = self.df[self.df["time"] >= str(self.data_start)]
-        self.df = self.df[self.df["time"] <= str(self.data_end)]
-
-    def split_data(self):
-        # Split data based on the boundary date
-        boundary_timestamp = pd.Timestamp(self.boundary)
-        train_set = self.df[self.df["time"] < boundary_timestamp]
-        test_set = self.df[self.df["time"] >= boundary_timestamp]
-
-        # Return train and test sets
-        return train_set, test_set
+    def preprocess_time(self) -> pd.DataFrame:
+        """Merge date and time columns to datetime column."""
+        datetime = self.df[DataEnergy.datetime_columns]
+        return pd.to_datetime(datetime)
