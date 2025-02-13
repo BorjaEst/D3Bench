@@ -6,11 +6,11 @@ including the buildings to benchmark, the criteria to test, the tools to use,
 whether to run on a VM, the dataset to use, and the logging level.
 """
 
-import dataclasses as dc
 import json
 import logging
 from pathlib import Path
 
+from pydantic.json import pydantic_encoder
 from rich import print  # pylint: disable=redefined-builtin
 from rich.logging import RichHandler
 
@@ -20,7 +20,6 @@ from d3bench.benchmark import Benchmark, BenchmarkOptions, Report
 from d3bench.config import Settings
 from d3bench.dataset import Data, Dataset
 from d3bench.tools import Tool
-from d3bench.utils import CustomJSONEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -88,9 +87,15 @@ def save_results(
 ) -> None:
     """Save the results to a file."""
     output = Path("results") / options.results_file
-    results_dict = [dc.asdict(report) for report in results]
+    results_json = json.dumps(
+        results,
+        indent=4,
+        default=pydantic_encoder,
+    )
+
+    # Save the results to a file in JSON format
     with open(output, "w", encoding="utf-8") as file:
-        json.dump(results_dict, file, cls=CustomJSONEncoder, indent=4)
+        file.write(results_json)
 
 
 # Run main function if the script is executed

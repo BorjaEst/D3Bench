@@ -1,13 +1,12 @@
 """Utility functions and classes for the drift detection methods."""
 
-import dataclasses as dc
 import datetime as dt
-import json
 from abc import ABC, abstractmethod
 from enum import StrEnum
 from typing import Any, Literal, Optional
 
 import numpy as np
+from pydantic import BaseModel
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-few-public-methods
@@ -55,8 +54,7 @@ class Method(StrEnum):
     SPOTDIFF = "Spot-The-Difference Test"
 
 
-@dc.dataclass
-class TestInformation:
+class TestInformation(BaseModel):
     """Information about the test method used in the benchmark."""
 
     framework: Framework  # tool used in the benchmark
@@ -64,8 +62,7 @@ class TestInformation:
     repetitions: int  # number of repetitions
 
 
-@dc.dataclass
-class Results:  # pylint: disable=too-few-public-methods
+class Results(BaseModel):
     """Result of the test method."""
 
     drift_detected: Optional[bool] = None
@@ -73,8 +70,7 @@ class Results:  # pylint: disable=too-few-public-methods
     statistics: Optional[list[float]] = None
 
 
-@dc.dataclass
-class Stats:
+class Stats(BaseModel):
     """Statistics of the benchmark.
 
     Note It’s tempting to calculate mean and standard deviation from the
@@ -95,25 +91,16 @@ class Stats:
 
     def __init__(self, values: list[float | int]) -> None:
         values_array = np.array(values)
-        self.avg = values_array.mean()
-        self.max = values_array.max()
-        self.min = values_array.min()
-
-
-@dc.dataclass
-class DataInformation:
-    """Information about the data used to benchmark."""
-
-    len_traindata: int
-    len_testdata: int
+        self.avg = float(values_array.mean())
+        self.max = float(values_array.max())
+        self.min = float(values_array.min())
 
 
 DetectorType = Literal["Concept drift", "Data drift", "Virtual drift"]
 OperationType = Literal["Streaming", "Batch"]
 
 
-@dc.dataclass
-class DetectorInformation:
+class DetectorInformation(BaseModel):
     """Information about the detector used in the benchmark."""
 
     multi_features: bool  # Detector supports dim>1
@@ -122,8 +109,14 @@ class DetectorInformation:
     operation_type: OperationType  # Detector operation
 
 
-@dc.dataclass
-class Report:
+class DataInformation(BaseModel):
+    """Information about the data used to benchmark."""
+
+    len_traindata: int
+    len_testdata: int
+
+
+class Report(BaseModel):
     """Class to store the results of the benchmark."""
 
     test_information: TestInformation  # information about the test method
@@ -160,12 +153,3 @@ class BaseTestMethod(ABC):
     @abstractmethod
     def result(self) -> dict[str, Any]:
         """Return the result of the test."""
-
-
-class CustomJSONEncoder(json.JSONEncoder):
-    """Custom JSON encoder to serialize datetime objects."""
-
-    def default(self, o: object) -> Any:
-        if isinstance(o, dt.datetime):
-            return o.isoformat()
-        return super().default(o)
