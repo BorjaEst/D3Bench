@@ -12,7 +12,7 @@
             "module": "d3bench",
             "args": [ 
                 "--log_level=DEBUG",
-                "--criteria=[FUNCTIONAL,RUNTIME,CPUTIME,MEMORY]",
+                "--criteria=[FUNCTIONAL]",
                 "--tools=[Frouros]"
             ],
         }
