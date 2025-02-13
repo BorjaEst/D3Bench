@@ -46,12 +46,11 @@ class Frouros(Tool):
 
     name = "Frouros"
     methods = {
-        # Method.KOLMOGOROV_SMIRNOV: frouros.KSWIN,
+        Method.KOLMOGOROV_SMIRNOV: frouros.KSWIN,
         Method.CVM: frouros.CVMTest,
         # TODO: Add the rest of the methods
     }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        df.drop(columns={"ids", "time"}, inplace=True)
-        df["target"] = pd.to_numeric(df["target"])
+        df.drop(columns={"time"}, inplace=True)
         return df
