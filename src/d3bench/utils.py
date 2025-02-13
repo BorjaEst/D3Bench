@@ -90,6 +90,7 @@ class Stats(BaseModel):
     min: float  # Minimum value
 
     def __init__(self, values: list[float | int]) -> None:
+        super().__init__()  # Call pydantic initializer
         values_array = np.array(values)
         self.avg = float(values_array.mean())
         self.max = float(values_array.max())
