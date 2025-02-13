@@ -17,18 +17,14 @@ import d3bench.dataset
 import d3bench.tools
 from d3bench.benchmark import Benchmark, BenchmarkOptions, Report
 from d3bench.config import Settings
-from d3bench.dataset import Data, Dataset, DatasetOptions
+from d3bench.dataset import Data, Dataset
 from d3bench.tools import Tool
 
 logger = logging.getLogger(__name__)
 
 DATASETS: dict[str, Dataset] = {
-    "energy": d3bench.dataset.DataEnergy(
-        settings=DatasetOptions(buildings={1}),
-    ),
-    # "occupancy": d3bench.dataset.DataOccupancy(
-    #    settings=DatasetOptions(),
-    # ),
+    "energy": d3bench.dataset.DataEnergy(building_id=1),
+    # "occupancy": d3bench.dataset.DataOccupancy(),
 }
 
 TOOLS: dict[str, Tool] = {
@@ -53,7 +49,7 @@ def main(options: Settings):
 
     # Load dataset and tools from the arguments
     logger.debug("Call arguments: %s", options)
-    data = DATASETS[options.dataset]()
+    data = DATASETS[options.dataset].split_data()
     tools = [TOOLS[tool] for tool in options.tools]
 
     # Run the benchmark with the given parameters
