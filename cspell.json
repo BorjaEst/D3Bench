@@ -15,7 +15,9 @@
         "frouros",
         "Gebäude",
         "Hellinger",
+        "iloc",
         "isin",
+        "isna",
         "jensenshannon",
         "Jenson",
         "KOLMOGOROV",
@@ -27,6 +29,7 @@
         "MWURT",
         "mypy",
         "nannyml",
+        "notused",
         "Rieke",
         "rmem",
         "runmems",
@@ -34,7 +37,9 @@
         "smirnov",
         "spotdiff",
         "stattest",
-        "WASSERSTEIN"
+        "traindata",
+        "WASSERSTEIN",
+        "Xbench"
     ],
     "ignoreWords": [],
     "import": []
