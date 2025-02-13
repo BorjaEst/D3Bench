@@ -2,6 +2,7 @@
 
 import dataclasses as dc
 import datetime as dt
+import json
 from abc import ABC, abstractmethod
 from enum import StrEnum
 from typing import Any, Literal, Optional
@@ -159,3 +160,12 @@ class BaseTestMethod(ABC):
     @abstractmethod
     def result(self) -> dict[str, Any]:
         """Return the result of the test."""
+
+
+class CustomJSONEncoder(json.JSONEncoder):
+    """Custom JSON encoder to serialize datetime objects."""
+
+    def default(self, o: object) -> Any:
+        if isinstance(o, dt.datetime):
+            return o.isoformat()
+        return super().default(o)
