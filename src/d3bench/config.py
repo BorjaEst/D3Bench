@@ -38,7 +38,8 @@ class Settings(RunSettings, BaseSettings):
         description="Logging level.",
     )
     tools: set[Framework] = Field(
-        default=set(["Frouros", "Evidently", "NannyML", "Alibi-Detect"]),
+        # default=set(["Frouros", "Evidently", "NannyML", "Alibi-Detect"]),
+        default=set(["Frouros", "Evidently"]),
         description="List of tools to benchmark.",
     )
     dataset: Dataset = Field(

@@ -20,7 +20,7 @@ class KSWIN(utils.BaseTestMethod):
             operation_type="Streaming",
         )
 
-    def __init__(self, n_features: int) -> None:
+    def __init__(self, features: list[str]) -> None:
         config = concept_drift.KSWINConfig(seed=31)
         self.detector = concept_drift.KSWIN(config)
         self._drifts: list[Any] = []
@@ -37,7 +37,7 @@ class KSWIN(utils.BaseTestMethod):
 
     def result(self) -> dict[str, Any]:
         return {
-            "drift_detected": any(self._drifts),
+            "dataset_drift": any(self._drifts),
         }
 
 
@@ -53,22 +53,28 @@ class CVMTest(utils.BaseTestMethod):
             operation_type="Batch",
         )
 
-    def __init__(self, n_features: int) -> None:
-        self.detectors = [data_drift.CVMTest() for _ in range(n_features)]
-        self._results: list[Any] = []
+    def __init__(self, features: list[str]) -> None:
+        self.detectors = {k: data_drift.CVMTest() for k in features}
+        self._results: dict[str, Any] = {}
 
     def fit(self, x_reference: pd.DataFrame) -> None:
-        for i, feature in enumerate(x_reference.columns):
-            self.detectors[i].fit(X=x_reference[feature])
+        for feature in x_reference.columns:
+            self.detectors[feature].fit(X=x_reference[feature])
 
     def test(self, x_test: pd.DataFrame) -> None:
-        self._results = [
-            self.detectors[i].compare(X=x_test[feature])[0]
-            for i, feature in enumerate(x_test.columns)
-        ]
+        self._results = {
+            k: self.detectors[k].compare(X=x_test[k])[0]
+            for k in x_test.columns  # fmt: skip
+        }
 
     def result(self) -> dict[str, Any]:
         return {
-            "p_values": [result.p_value for result in self._results],
-            "statistics": [result.statistic for result in self._results],
+            "p_values": {
+                column: result.p_value  # fmt: skip
+                for column, result in self._results.items()
+            },
+            "statistics": {
+                column: result.statistic  # fmt: skip
+                for column, result in self._results.items()
+            },
         }

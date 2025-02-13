@@ -13,7 +13,7 @@
             "args": [ 
                 "--log_level=DEBUG",
                 "--criteria=[FUNCTIONAL]",
-                "--tools=[Frouros]"
+                "--tools=[Frouros,Evidently]"
             ],
         }
     ]

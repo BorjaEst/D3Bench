@@ -120,7 +120,7 @@ class Job:
         self.x_reference = tool.preprocess(benchmark.x_reference.copy())
         self.x_test = tool.preprocess(benchmark.x_test.copy())
         self.benchmark = benchmark
-        self.detector = tool[method](n_features=self.x_reference.shape[1])
+        self.detector = tool[method](features=self.x_reference.columns)
 
     def fit(self) -> None:
         """Run the benchmark with the given parameters."""

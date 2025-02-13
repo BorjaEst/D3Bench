@@ -54,3 +54,27 @@ class Frouros(Tool):
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df.drop(columns={"time"}, inplace=True)
         return df
+
+
+class Evidently(Tool):
+    """Evidently drift detection tool."""
+
+    name = "Evidently"
+    methods = {
+        Method.KOLMOGOROV_SMIRNOV: evidently.KSWIN,
+        # Method.WASSERSTEIN: "wasserstein",
+        # Method.KLD: "kl_div",
+        # Method.PSI: "psi",
+        # Method.JSD: "jensenshannon",
+        # Method.AD: "anderson",
+        # Method.CVM: "cramer_von_mises",
+        # Method.HD: "hellinger",
+        # Method.MWURT: "mannw",
+        # Method.ED: "ed",
+        # Method.ES: "es",
+        # Method.TT: "t_test",
+    }
+
+    def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
+        df.drop(columns={"time"}, inplace=True)
+        return df

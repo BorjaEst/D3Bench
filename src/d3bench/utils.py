@@ -65,9 +65,9 @@ class TestInformation(BaseModel):
 class Results(BaseModel):
     """Result of the test method."""
 
-    drift_detected: Optional[bool] = None
-    p_values: Optional[list[float]] = None
-    statistics: Optional[list[float]] = None
+    dataset_drift: Optional[bool] = None
+    p_values: Optional[dict[str, float]] = None
+    statistics: Optional[dict[str, float]] = None
 
 
 class Stats(BaseModel):
