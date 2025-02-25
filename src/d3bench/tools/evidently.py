@@ -1,8 +1,6 @@
 """Module for Evidently detectors."""
 
 from typing import Any
-from functools import partial
-from typing import Callable
 
 import pandas as pd
 from evidently.metric_preset import DataDriftPreset

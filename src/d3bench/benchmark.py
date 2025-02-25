@@ -3,22 +3,21 @@
 import logging
 import time
 import timeit
-from pathlib import Path
 from typing import Any, Optional
 
 from memory_profiler import memory_usage
 from pydantic import Field
 
 from d3bench import utils
+from d3bench.config import Criteria, Method
 from d3bench.dataset import Data
 from d3bench.tools import Tool
-from d3bench.utils import Criteria, Method, Report
+from d3bench.utils import Report
 
 # pylint: disable=too-few-public-methods
 
 
 logger = logging.getLogger(__name__)
-RESULTS_PATH = Path("results")
 
 
 class BenchmarkOptions:
@@ -214,3 +213,20 @@ criteria_fn = {
     "CPUTIME": run_cputime,
     "MEMORY": run_memory,
 }
+
+
+def run_tools(
+    tools: list[Tool],
+    data: Data,
+    args: BenchmarkOptions,
+) -> list[Report]:
+    """Run the benchmarks for the given tool."""
+
+    # Run the benchmark for each tool
+    results = []
+    for tool in tools:
+        logger.info("Running benchmarks for tool: %s", tool)
+        results += list(Benchmark(tool, data, args))
+
+    # Return the results
+    return results

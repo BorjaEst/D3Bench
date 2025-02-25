@@ -1,52 +1,73 @@
 """Configuration settings for the d3bench package."""
 
-from typing import Literal
+import os
+from enum import Enum, StrEnum
+from pathlib import Path
+from typing import Literal, Tuple, TypeAlias
 
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import pandas as pd
 
-from d3bench.benchmark import BenchmarkOptions
-from d3bench.dataset import DatasetOptions
-from d3bench.tools import ToolOptions
-from d3bench.utils import Dataset, Framework
-
-# pylint: disable=too-few-public-methods
+DATA_PATH = os.getenv("DATA_PATH", "data")
+data_path = Path(DATA_PATH)
 
 
-LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+RESULTS_PATH = os.getenv("RESULTS_PATH", "results")
+results_path = Path(RESULTS_PATH)
 
 
-class RunSettings(BenchmarkOptions, DatasetOptions, ToolOptions):
-    """Settings to run a benchmark."""
+class Method(StrEnum):
+    """Available methods for drift detection."""
+
+    KOLMOGOROV_SMIRNOV = "K-S Test"
+    WASSERSTEIN = "Wasserstein Distanz"
+    KLD = "K-L Divergence"
+    PSI = "PSI"
+    JSD = "J-S Distance"
+    AD = "Anderson-Darling"
+    CVM = "Cramer-von-Mises"
+    HD = "Hellinger-Distance"
+    MWURT = "Mann-Whitney U-Rank Test"
+    ED = "Energy-Distance"
+    ES = "Epps-Singleton"
+    TT = "T-Test"
+    SPOTDIFF = "Spot-The-Difference Test"
 
 
-class Settings(RunSettings, BaseSettings):
-    """
-    This module provides a command-line interface to run D3Bench benchmarks.
+class Datasets(Enum):
+    """Enum class for benchmark datasets"""
 
-    The script allows users to specify various parameters for the benchmark,
-    including the buildings to benchmark, the criteria to test, the tools to
-    use, whether to run on a VM, the dataset to use, and the logging level.
-    """  # Description for the script help message
+    ENERGY = "energy"
+    OCCUPANCY = "occupancy"
 
-    # Class attributes
-    model_config = SettingsConfigDict(cli_parse_args=True)
 
-    # Logging and reporting
-    log_level: LogLevel = Field(
-        default="INFO",
-        description="Logging level.",
-    )
-    tools: set[Framework] = Field(
-        # default=set(["Frouros", "Evidently", "NannyML", "Alibi-Detect"]),
-        default=set(["Frouros", "Evidently"]),
-        description="List of tools to benchmark.",
-    )
-    dataset: Dataset = Field(
-        default="energy",
-        description="Dataset to use.",
-    )
-    results_file: str = Field(
-        default="results.json",
-        description="File to save the results to.",
-    )
+Framework: TypeAlias = Literal[
+    "Frouros",
+    "Evidently",
+    "NannyML",
+    "Alibi-Detect",
+]
+
+Data = Tuple[pd.DataFrame, pd.DataFrame]
+Dataset: TypeAlias = Literal[
+    "energy",
+    "occupancy",
+]
+
+
+Criteria: TypeAlias = Literal[
+    "FUNCTIONAL",
+    "RUNTIME",
+    "CPUTIME",
+    "MEMORY",
+]
+
+
+DetectorType: TypeAlias = Literal[
+    "Concept drift",
+    "Data drift",
+    "Virtual drift",
+]
+OperationType: TypeAlias = Literal[
+    "Streaming",
+    "Batch",
+]

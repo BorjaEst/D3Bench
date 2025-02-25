@@ -1,25 +1,15 @@
 import datetime as dt
 from abc import ABC, abstractmethod
-from enum import Enum
-from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import pandas as pd
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
+from d3bench import config
+from d3bench.config import Data
+
 # pylint: disable=too-few-public-methods
-
-
-Data = Tuple[pd.DataFrame, pd.DataFrame]
-DATA_PATH = Path("data")
-
-
-class Datasets(Enum):
-    """Enum class for benchmark datasets"""
-
-    ENERGY = "energy"
-    OCCUPANCY = "occupancy"
 
 
 class DatasetOptions(BaseSettings):
@@ -47,7 +37,7 @@ class Dataset(ABC):
 
     def __init__(self, settings: Optional[DatasetOptions] = None):
         settings = settings or DatasetOptions()
-        self.df: pd.DataFrame = pd.read_csv(DATA_PATH / self.file_name)
+        self.df: pd.DataFrame = pd.read_csv(config.data_path / self.file_name)
         self.df["time"] = self.preprocess_time()
         self.data_start = settings.data_start
         self.data_end = settings.data_end

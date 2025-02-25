@@ -1,63 +1,24 @@
 """Utility functions and classes for the drift detection methods."""
 
 import datetime as dt
+import json
 from abc import ABC, abstractmethod
-from enum import StrEnum
-from typing import Any, Literal, Optional
+from typing import Any, Optional
 
 import numpy as np
 from pydantic import BaseModel
+from pydantic.json import pydantic_encoder
+
+from d3bench import config
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-few-public-methods
 
 
-# Define the available frameworks
-Framework = Literal[
-    "Frouros",
-    "Evidently",
-    "NannyML",
-    "Alibi-Detect",
-]
-
-# Define the available datasets
-Dataset = Literal[
-    "energy",
-    "occupancy",
-]
-
-# Define the available criteria to test
-Criteria = Literal[
-    "FUNCTIONAL",
-    "RUNTIME",
-    "CPUTIME",
-    "MEMORY",
-]
-
-
-# Define the available methods for drift detection
-class Method(StrEnum):
-    """Available methods for drift detection."""
-
-    KOLMOGOROV_SMIRNOV = "K-S Test"
-    WASSERSTEIN = "Wasserstein Distanz"
-    KLD = "K-L Divergence"
-    PSI = "PSI"
-    JSD = "J-S Distance"
-    AD = "Anderson-Darling"
-    CVM = "Cramer-von-Mises"
-    HD = "Hellinger-Distance"
-    MWURT = "Mann-Whitney U-Rank Test"
-    ED = "Energy-Distance"
-    ES = "Epps-Singleton"
-    TT = "T-Test"
-    SPOTDIFF = "Spot-The-Difference Test"
-
-
 class TestInformation(BaseModel):
     """Information about the test method used in the benchmark."""
 
-    framework: Framework  # tool used in the benchmark
+    framework: config.Framework  # tool used in the benchmark
     run_on_vm: bool  # run on a VM
     repetitions: int  # number of repetitions
 
@@ -97,17 +58,13 @@ class Stats(BaseModel):
         self.min = float(values_array.min())
 
 
-DetectorType = Literal["Concept drift", "Data drift", "Virtual drift"]
-OperationType = Literal["Streaming", "Batch"]
-
-
 class DetectorInformation(BaseModel):
     """Information about the detector used in the benchmark."""
 
     multivariate_detector: bool  # Detector supports dim>1
     fit_method: bool  # Detector has a fit method
-    detector_type: DetectorType  # Detector type
-    operation_type: OperationType  # Detector operation
+    detector_type: config.DetectorType  # Detector type
+    operation_type: config.OperationType  # Detector operation
 
 
 class DataInformation(BaseModel):
@@ -121,7 +78,7 @@ class Report(BaseModel):
     """Class to store the results of the benchmark."""
 
     test_information: TestInformation  # information about the test method
-    method: Method  # method used in the benchmark
+    method: config.Method  # method used in the benchmark
     detector_info: DetectorInformation  # information about the detector
     data_info: DataInformation  # information about the data used
     time: dt.datetime = dt.datetime.now()  # time of the benchmark
@@ -154,3 +111,20 @@ class BaseTestMethod(ABC):
     @abstractmethod
     def result(self) -> dict[str, Any]:
         """Return the result of the test."""
+
+
+def save_results(
+    results: list[Report],
+    file_name: str,
+) -> None:
+    """Save the results to a JSON parsed file."""
+    output = config.results_path / file_name
+    results_json = json.dumps(
+        results,
+        indent=4,
+        default=pydantic_encoder,
+    )
+
+    # Save the results to a file in JSON format
+    with open(output, "w", encoding="utf-8") as file:
+        file.write(results_json)

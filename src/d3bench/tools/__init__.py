@@ -6,8 +6,8 @@ from typing import Any, Optional
 import pandas as pd
 from pydantic import Field
 
+from d3bench.config import Framework, Method
 from d3bench.tools import alibi, evidently, frouros, nannyml
-from d3bench.utils import Framework, Method
 
 # pylint: disable=too-few-public-methods
 
