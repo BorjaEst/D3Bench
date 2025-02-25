@@ -14,7 +14,7 @@ class KSWIN(utils.BaseTestMethod):
     @property
     def info(self) -> utils.DetectorInformation:
         return utils.DetectorInformation(
-            multi_features=True,
+            multivariate_detector=True,
             fit_method=False,
             detector_type="Concept drift",
             operation_type="Streaming",
@@ -47,7 +47,7 @@ class CVMTest(utils.BaseTestMethod):
     @property
     def info(self) -> utils.DetectorInformation:
         return utils.DetectorInformation(
-            multi_features=False,
+            multivariate_detector=False,
             fit_method=True,
             detector_type="Data drift",
             operation_type="Batch",

@@ -78,3 +78,18 @@ class Evidently(Tool):
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df.drop(columns={"time"}, inplace=True)
         return df
+
+
+class NannyML(Tool):
+    """NannyML drift detection tool."""
+
+    name = "NannyML"
+    methods = {
+        Method.KOLMOGOROV_SMIRNOV: nannyml.KSWIN,
+        # Method.WASSERSTEIN: "wasserstein",
+        # Method.JSD: "jensen_shannon",
+        # Method.HD: "hellinger",
+    }
+
+    def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df  # No preprocessing needed

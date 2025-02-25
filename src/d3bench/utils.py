@@ -104,7 +104,7 @@ OperationType = Literal["Streaming", "Batch"]
 class DetectorInformation(BaseModel):
     """Information about the detector used in the benchmark."""
 
-    multi_features: bool  # Detector supports dim>1
+    multivariate_detector: bool  # Detector supports dim>1
     fit_method: bool  # Detector has a fit method
     detector_type: DetectorType  # Detector type
     operation_type: OperationType  # Detector operation

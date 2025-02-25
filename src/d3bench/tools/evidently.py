@@ -17,7 +17,7 @@ class KSWIN(utils.BaseTestMethod):
     @property
     def info(self) -> utils.DetectorInformation:
         return utils.DetectorInformation(
-            multi_features=True,
+            multivariate_detector=True,
             fit_method=False,
             detector_type="Concept drift",
             operation_type="Batch",

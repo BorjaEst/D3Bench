@@ -31,7 +31,7 @@ DATASETS: dict[str, Dataset] = {
 TOOLS: dict[str, Tool] = {
     "Frouros": d3bench.tools.Frouros(),
     "Evidently": d3bench.tools.Evidently(),
-    # "NannyML": d3bench.tools.NannyML(),
+    "NannyML": d3bench.tools.NannyML(),
     # "Alibi-Detect": d3bench.tools.AlibiDetect(),
 }
 
