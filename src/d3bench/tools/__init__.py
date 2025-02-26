@@ -6,8 +6,12 @@ from typing import Any, Optional
 import pandas as pd
 from pydantic import Field
 
-from d3bench.config import Framework, Method
-from d3bench.tools import alibi, evidently, frouros, nannyml
+import d3bench.tools.alibi as tools_alibi
+import d3bench.tools.evidently as tools_evidently
+import d3bench.tools.frouros as tools_frouros
+import d3bench.tools.nannyml as tools_nannyml
+from d3bench import methods
+from d3bench.config import Framework
 
 # pylint: disable=too-few-public-methods
 
@@ -26,7 +30,9 @@ class Tool(ABC):
 
     # Abstract attribute to define by child class
     name: Framework
-    methods: dict[Method, Any] = {}
+    online_cd_methods: dict[methods.OnlineCD, Any] = {}
+    online_dd_methods: dict[methods.OnlineDD, Any] = {}
+    batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def __init__(self, settings: Optional[ToolOptions] = None):
         settings = settings or ToolOptions()
@@ -37,19 +43,14 @@ class Tool(ABC):
         """Preprocess the data before drift detection."""
         raise NotImplementedError
 
-    def __getitem__(self, name):
-        return self.methods[name]
-
 
 class Frouros(Tool):
     """Frouros drift detection tool."""
 
-    name = "Frouros"
-    methods = {
-        Method.KOLMOGOROV_SMIRNOV: frouros.KSWIN,
-        Method.CVM: frouros.CVMTest,
-        # TODO: Add the rest of the methods
-    }
+    name: Framework = "Frouros"
+    online_cd_methods: dict[methods.OnlineCD, Any] = {}
+    online_dd_methods: dict[methods.OnlineDD, Any] = {}
+    batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df.drop(columns={"time"}, inplace=True)
@@ -59,21 +60,10 @@ class Frouros(Tool):
 class Evidently(Tool):
     """Evidently drift detection tool."""
 
-    name = "Evidently"
-    methods = {
-        Method.KOLMOGOROV_SMIRNOV: evidently.KSWIN,
-        # Method.WASSERSTEIN: "wasserstein",
-        # Method.KLD: "kl_div",
-        # Method.PSI: "psi",
-        # Method.JSD: "jensenshannon",
-        # Method.AD: "anderson",
-        # Method.CVM: "cramer_von_mises",
-        # Method.HD: "hellinger",
-        # Method.MWURT: "mannw",
-        # Method.ED: "ed",
-        # Method.ES: "es",
-        # Method.TT: "t_test",
-    }
+    name: Framework = "Evidently"
+    online_cd_methods: dict[methods.OnlineCD, Any] = {}
+    online_dd_methods: dict[methods.OnlineDD, Any] = {}
+    batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df.drop(columns={"time"}, inplace=True)
@@ -83,13 +73,10 @@ class Evidently(Tool):
 class NannyML(Tool):
     """NannyML drift detection tool."""
 
-    name = "NannyML"
-    methods = {
-        Method.KOLMOGOROV_SMIRNOV: nannyml.KSWIN,
-        # Method.WASSERSTEIN: "wasserstein",
-        # Method.JSD: "jensen_shannon",
-        # Method.HD: "hellinger",
-    }
+    name: Framework = "NannyML"
+    online_cd_methods: dict[methods.OnlineCD, Any] = {}
+    online_dd_methods: dict[methods.OnlineDD, Any] = {}
+    batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         return df  # No preprocessing needed
