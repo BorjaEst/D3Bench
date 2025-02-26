@@ -102,7 +102,7 @@ class OnlineCDReport(Report):
     positives/negatives.
     """
 
-    method: methods.OnlineSupervisedConceptDrift  # method used in benchmark
+    method: methods.OnlineCD  # method used in benchmark
     detection_delay: Optional[Stats] = None  # samples until drift detection
     false_alarm_rate: Optional[float] = Field(None, ge=0.0, le=1.0)
     missed_detection_rate: Optional[float] = Field(None, ge=0.0, le=1.0)
@@ -129,7 +129,7 @@ class OnlineDDReport(Report):
     efficiency.
     """
 
-    method: methods.OnlineUnsupervisedDataDrift  # method used in benchmark
+    method: methods.OnlineDD  # method used in benchmark
     detection_delay: Optional[Stats] = None  # samples until drift detection
     false_alarm_rate: Optional[float] = Field(None, ge=0.0, le=1.0)
     statistical_power: Optional[float] = Field(None, ge=0.0, le=1.0)
@@ -154,7 +154,7 @@ class BatchCDReport(Report):
     focusing on detection accuracy and characteristics of identified drift.
     """
 
-    method: methods.BatchConceptDrift  # method used in benchmark
+    method: methods.BatchCD  # method used in benchmark
     drift_detected: bool = False  # whether drift was detected
     detection_accuracy: Optional[float] = Field(None, ge=0.0, le=1.0)
     drift_magnitude: Optional[float] = Field(None, ge=0.0)
@@ -180,7 +180,7 @@ class BatchDDReport(Report):
     focusing on statistical measures and feature-level drift analysis.
     """
 
-    method: methods.BatchDataDrift  # method used in benchmark
+    method: methods.BatchDD  # method used in benchmark
     drift_detected: bool = False  # whether drift was detected
     drift_score: Optional[float] = Field(None, ge=0.0)  # overall magnitude
     feature_drift_scores: Optional[Dict[str, float]] = None  # per-feature
