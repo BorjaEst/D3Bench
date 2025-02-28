@@ -5,7 +5,7 @@ benchmarking process.
 
 import json
 from pathlib import Path
-from typing import Callable, Type
+from typing import Sequence, Type
 
 from pydantic import BaseModel, Field
 from pydantic.json import pydantic_encoder
@@ -54,9 +54,18 @@ class Results(BaseModel):
                 online_cd_report(options.criteria, tool, method, options)
                 for method in tool.online_cd_methods
             ],
-            online_dd=[],  # TODO: add the rest of the reports
-            batch_cd=[],  # TODO: add the rest of the reports
-            batch_dd=[],  # TODO: add the rest of the reports
+            online_dd=[
+                online_dd_report(options.criteria, tool, method, options)
+                for method in tool.online_dd_methods
+            ],
+            batch_cd=[
+                batch_cd_report(options.criteria, tool, method, options)
+                for method in tool.batch_cd_methods
+            ],
+            batch_dd=[
+                batch_dd_report(options.criteria, tool, method, options)
+                for method in tool.batch_dd_methods
+            ],
         )
 
     def to_json(self) -> str:
@@ -76,6 +85,39 @@ def online_cd_report(
     return reports.OnlineCDReport(criteria, _benchmark)
 
 
+def online_dd_report(
+    criteria: set[Criteria],
+    tool: Tool,
+    method: Method,
+    options: benchmarks.Options,
+) -> reports.OnlineDDReport:
+    """Run an online unsupervised concept drift detection benchmark."""
+    _benchmark = Benchmark(tool, method, options)
+    return reports.OnlineDDReport(criteria, _benchmark)
+
+
+def batch_cd_report(
+    criteria: set[Criteria],
+    tool: Tool,
+    method: Method,
+    options: benchmarks.Options,
+) -> reports.BatchCDReport:
+    """Run a batch supervised concept drift detection benchmark."""
+    _benchmark = Benchmark(tool, method, options)
+    return reports.BatchCDReport(criteria, _benchmark)
+
+
+def batch_dd_report(
+    criteria: set[Criteria],
+    tool: Tool,
+    method: Method,
+    options: benchmarks.Options,
+) -> reports.BatchDDReport:
+    """Run a batch unsupervised concept drift detection benchmark."""
+    _benchmark = Benchmark(tool, method, options)
+    return reports.BatchDDReport(criteria, _benchmark)
+
+
 def save_results(results: list[Results], output: str) -> None:
     """Save the results to a JSON parsed file."""
     # Generate the folder in the path if it does not exist
@@ -89,7 +131,7 @@ def save_results(results: list[Results], output: str) -> None:
         _save(result.batch_dd, output_path / "batch_dd.json")
 
 
-def _save(results: list[reports.Report], file_name: Path) -> None:
+def _save(results: Sequence[reports.Report], file_name: Path) -> None:
     options = {"indent": 4, "default": pydantic_encoder}
     results_json = json.dumps(results, **options)
     with open(file_name, "a", encoding="utf-8") as file:
