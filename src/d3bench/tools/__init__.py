@@ -12,7 +12,7 @@ import d3bench.tools.alibi as tools_alibi
 import d3bench.tools.evidently as tools_evidently
 import d3bench.tools.frouros as tools_frouros
 import d3bench.tools.nannyml as tools_nannyml
-from d3bench import benchmarks, methods
+from d3bench import methods
 from d3bench.config import Data, Framework
 
 # pylint: disable=too-few-public-methods
@@ -35,10 +35,10 @@ class Tool(ABC):
 
     # Abstract attributes to define by child classes
     name: Framework
-    online_cd_methods: dict[methods.OnlineCD, Any] = {}
-    online_dd_methods: dict[methods.OnlineDD, Any] = {}
-    batch_cd_methods: dict[methods.BatchCD, Any] = {}
-    batch_dd_methods: dict[methods.BatchDD, Any] = {}
+    online_cd_methods: dict[methods.OnlineCD, Any]
+    online_dd_methods: dict[methods.OnlineDD, Any]
+    batch_cd_methods: dict[methods.BatchCD, Any]
+    batch_dd_methods: dict[methods.BatchDD, Any]
 
     def __init__(self, data: Data, settings: Optional[Options] = None):
         settings = settings or Options()
@@ -67,7 +67,9 @@ class Frouros(Tool):
     """Frouros drift detection tool."""
 
     name: Framework = "Frouros"
-    online_cd_methods: dict[methods.OnlineCD, Any] = {}
+    online_cd_methods: dict[methods.OnlineCD, Any] = {
+        methods.OnlineCD.KSWIN: tools_frouros.KSWIN,
+    }
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {}
 

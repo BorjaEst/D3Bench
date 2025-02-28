@@ -11,9 +11,6 @@ from d3bench import utils
 # Online Supervised Concept Drift Detection
 
 
-# Online Unsupervised Data Drift Detection
-
-
 class KSWIN(utils.BaseTestMethod):
     """Kolmogorov-Smirnov Windowing detector."""
 
@@ -36,6 +33,14 @@ class KSWIN(utils.BaseTestMethod):
         return {
             "dataset_drift": any(self._drifts),
         }
+
+
+# Online Unsupervised Data Drift Detection
+
+# Batch Concept Drift Detection
+
+
+# Batch Data Drift Detection
 
 
 class CVMTest(utils.BaseTestMethod):

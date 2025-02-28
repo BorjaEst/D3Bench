@@ -3,16 +3,16 @@
 import logging
 import time
 import timeit
-from typing import Any, Optional
+from typing import Any, Optional, Type, Union
 
-import pandas as pd
 from memory_profiler import memory_usage
 from pydantic import Field
-
-from d3bench import tools, utils
-from d3bench.config import Criteria, Data, Method
-from d3bench.tools import Tool
 from pydantic_settings import BaseSettings
+
+from d3bench.config import Data
+from d3bench.methods import BatchCD, BatchDD, OnlineCD, OnlineDD
+from d3bench.tools import Tool
+from d3bench.utils import BaseTestMethod
 
 # pylint: disable=too-few-public-methods
 
@@ -28,23 +28,31 @@ class Options(BaseSettings):
         description="Number of repetitions for the benchmark.",
     )
 
+    on_vm: bool = Field(
+        default=False,
+        description="Flag to run the benchmark on a VM.",
+    )
+
 
 class Benchmark:
     """Class to run a benchmark to obtain Results."""
 
     def __init__(
         self,
+        method: Union[OnlineCD, OnlineDD, BatchCD, BatchDD],
         tool: Tool,
-        method: Method,
+        tool_test: Type[BaseTestMethod],
         options: Optional[Options] = None,
     ) -> None:
         options = options or Options()
         self.repetitions = options.repetitions
-        self.tool = tool
+        self.run_on_vm = options.on_vm
         self.method = method
+        self.tool = tool
+        self.tool_test = tool_test
         self.x_reference = tool.data["x_reference"].copy()
         self.x_test = tool.data["x_test"].copy()
-        self.job = Job(method, self.data)
+        self.job = Job(tool_test, self.data)
         self.job.fit()  # Fit the model
 
     @property
@@ -101,12 +109,12 @@ class Benchmark:
 class Job:
     """Class to run a benchmark job with the given parameters."""
 
-    def __init__(self, method: Method, data: Data) -> None:
+    def __init__(self, tool_test: Type[BaseTestMethod], data: Data) -> None:
         # Prepare the job for the benchmark, copy to avoid side effects
         self.x_reference = data["x_reference"]
         self.x_test = data["x_test"]
         self.features = self.x_reference.columns
-        self.detector = method(self.features)
+        self.detector = tool_test(self.features)
 
     def fit(self) -> None:
         """Run the benchmark with the given parameters."""

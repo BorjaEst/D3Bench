@@ -10,7 +10,7 @@ from typing import Sequence, Type
 from pydantic import BaseModel, Field
 from pydantic.json import pydantic_encoder
 
-from d3bench import benchmarks, config, datasets, reports, tools
+from d3bench import benchmarks, config, datasets, methods, reports, tools
 from d3bench.benchmarks import Benchmark
 from d3bench.config import Criteria, Datafile, Framework, Method
 from d3bench.datasets import Dataset
@@ -77,44 +77,48 @@ class Results(BaseModel):
 def online_cd_report(
     criteria: set[Criteria],
     tool: Tool,
-    method: Method,
+    method: methods.OnlineCD,
     options: benchmarks.Options,
 ) -> reports.OnlineCDReport:
     """Run an online supervised concept drift detection benchmark."""
-    _benchmark = Benchmark(tool, method, options)
+    tool_test = tool.online_cd_methods[method]
+    _benchmark = Benchmark(method, tool, tool_test, options)
     return reports.OnlineCDReport(criteria, _benchmark)
 
 
 def online_dd_report(
     criteria: set[Criteria],
     tool: Tool,
-    method: Method,
+    method: methods.OnlineDD,
     options: benchmarks.Options,
 ) -> reports.OnlineDDReport:
     """Run an online unsupervised concept drift detection benchmark."""
-    _benchmark = Benchmark(tool, method, options)
+    tool_test = tool.online_dd_methods[method]
+    _benchmark = Benchmark(method, tool, tool_test, options)
     return reports.OnlineDDReport(criteria, _benchmark)
 
 
 def batch_cd_report(
     criteria: set[Criteria],
     tool: Tool,
-    method: Method,
+    method: methods.BatchCD,
     options: benchmarks.Options,
 ) -> reports.BatchCDReport:
     """Run a batch supervised concept drift detection benchmark."""
-    _benchmark = Benchmark(tool, method, options)
+    tool_test = tool.batch_cd_methods[method]
+    _benchmark = Benchmark(method, tool, tool_test, options)
     return reports.BatchCDReport(criteria, _benchmark)
 
 
 def batch_dd_report(
     criteria: set[Criteria],
     tool: Tool,
-    method: Method,
+    method: methods.BatchDD,
     options: benchmarks.Options,
 ) -> reports.BatchDDReport:
     """Run a batch unsupervised concept drift detection benchmark."""
-    _benchmark = Benchmark(tool, method, options)
+    tool_test = tool.batch_dd_methods[method]
+    _benchmark = Benchmark(method, tool, tool_test, options)
     return reports.BatchDDReport(criteria, _benchmark)
 
 

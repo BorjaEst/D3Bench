@@ -12,7 +12,7 @@ class BaseTestMethod(ABC):
     """Base class for the test methods."""
 
     @abstractmethod
-    def __init__(self, n_features: int) -> None:
+    def __init__(self, features: list[str]) -> None:
         """Initialize the test method."""
 
     @abstractmethod

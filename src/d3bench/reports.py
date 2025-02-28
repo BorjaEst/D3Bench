@@ -11,10 +11,10 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 from pydantic import BaseModel, Field, field_validator
 from pydantic.json import pydantic_encoder
-from d3bench.benchmarks import Benchmark
-from d3bench.config import Criteria
 
-from d3bench import config, methods
+from d3bench import methods
+from d3bench.benchmarks import Benchmark
+from d3bench.config import Criteria, Framework
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-few-public-methods
@@ -29,7 +29,7 @@ class TestInformation(BaseModel):
     test data.
     """
 
-    framework: config.Framework  # tool used in the benchmark
+    framework: Framework  # tool used in the benchmark
     run_on_vm: bool  # run on a VM
     repetitions: int  # number of repetitions
     len_traindata: int  # length of the training data
@@ -45,7 +45,7 @@ class TestInformation(BaseModel):
 
     def __init__(self, benchmark: Benchmark) -> None:
         super().__init__(
-            framework=benchmark.tool,
+            framework=benchmark.tool.name,
             run_on_vm=benchmark.run_on_vm,
             repetitions=benchmark.repetitions,
             len_traindata=benchmark.x_reference.shape[0],
