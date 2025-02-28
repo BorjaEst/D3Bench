@@ -8,17 +8,14 @@ from frouros.detectors import concept_drift, data_drift
 from d3bench import utils
 
 
+# Online Supervised Concept Drift Detection
+
+
+# Online Unsupervised Data Drift Detection
+
+
 class KSWIN(utils.BaseTestMethod):
     """Kolmogorov-Smirnov Windowing detector."""
-
-    @property
-    def info(self) -> utils.DetectorInformation:
-        return utils.DetectorInformation(
-            multivariate_detector=True,
-            fit_method=False,
-            detector_type="Concept drift",
-            operation_type="Streaming",
-        )
 
     def __init__(self, features: list[str]) -> None:
         config = concept_drift.KSWINConfig(seed=31)
@@ -43,15 +40,6 @@ class KSWIN(utils.BaseTestMethod):
 
 class CVMTest(utils.BaseTestMethod):
     """Cramer-von Mises test for data drift detection."""
-
-    @property
-    def info(self) -> utils.DetectorInformation:
-        return utils.DetectorInformation(
-            multivariate_detector=False,
-            fit_method=True,
-            detector_type="Data drift",
-            operation_type="Batch",
-        )
 
     def __init__(self, features: list[str]) -> None:
         self.detectors = {k: data_drift.CVMTest() for k in features}

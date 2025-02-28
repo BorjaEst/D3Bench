@@ -1,45 +1,30 @@
 """Configuration settings for the d3bench package."""
 
 import os
-from enum import Enum, StrEnum
 from pathlib import Path
-from typing import Literal, Tuple, TypeAlias
+from typing import Literal, TypeAlias, Union
 
 import pandas as pd
 
-DATA_PATH = os.getenv("DATA_PATH", "data")
+from d3bench import methods
+
+# Path where the data is stored
+DATA_PATH = os.getenv("DATA_PATH", "datafiles")
 data_path = Path(DATA_PATH)
 
 
+# Path where the results are stored
 RESULTS_PATH = os.getenv("RESULTS_PATH", "results")
 results_path = Path(RESULTS_PATH)
 
 
-class Method(StrEnum):
-    """Available methods for drift detection."""
-
-    KOLMOGOROV_SMIRNOV = "K-S Test"
-    WASSERSTEIN = "Wasserstein Distanz"
-    KLD = "K-L Divergence"
-    PSI = "PSI"
-    JSD = "J-S Distance"
-    AD = "Anderson-Darling"
-    CVM = "Cramer-von-Mises"
-    HD = "Hellinger-Distance"
-    MWURT = "Mann-Whitney U-Rank Test"
-    ED = "Energy-Distance"
-    ES = "Epps-Singleton"
-    TT = "T-Test"
-    SPOTDIFF = "Spot-The-Difference Test"
+# Define the types of drift detection methods
+OnlineMethod: TypeAlias = Union[methods.OnlineCD, methods.OnlineDD]
+BatchMethod: TypeAlias = Union[methods.BatchCD, methods.BatchDD]
+Method: TypeAlias = Union[OnlineMethod, BatchMethod]
 
 
-class Datasets(Enum):
-    """Enum class for benchmark datasets"""
-
-    ENERGY = "energy"
-    OCCUPANCY = "occupancy"
-
-
+# Define the allowed frameworks for the benchmark
 Framework: TypeAlias = Literal[
     "Frouros",
     "Evidently",
@@ -47,27 +32,17 @@ Framework: TypeAlias = Literal[
     "Alibi-Detect",
 ]
 
-Data = Tuple[pd.DataFrame, pd.DataFrame]
-Dataset: TypeAlias = Literal[
+# Define the available datasets for the benchmark
+Data: TypeAlias = dict[Literal["x_reference", "x_test"], pd.DataFrame]
+Datafile: TypeAlias = Literal[
     "energy",
     "occupancy",
 ]
 
-
+# Define the criteria evaluations for the benchmark
 Criteria: TypeAlias = Literal[
-    "FUNCTIONAL",
-    "RUNTIME",
-    "CPUTIME",
-    "MEMORY",
-]
-
-
-DetectorType: TypeAlias = Literal[
-    "Concept drift",
-    "Data drift",
-    "Virtual drift",
-]
-OperationType: TypeAlias = Literal[
-    "Streaming",
-    "Batch",
+    "functional",
+    "runtime",
+    "cputime",
+    "memory",
 ]

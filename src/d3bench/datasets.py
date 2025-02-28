@@ -12,7 +12,7 @@ from d3bench.config import Data
 # pylint: disable=too-few-public-methods
 
 
-class DatasetOptions(BaseSettings):
+class Options(BaseSettings):
     """Settings to instantiate a dataset."""
 
     data_start: dt.date = Field(
@@ -35,8 +35,8 @@ class Dataset(ABC):
     file_name: str
     measure_columns: list[str]
 
-    def __init__(self, settings: Optional[DatasetOptions] = None):
-        settings = settings or DatasetOptions()
+    def __init__(self, settings: Optional[Options] = None):
+        settings = settings or Options()
         self.df: pd.DataFrame = pd.read_csv(config.data_path / self.file_name)
         self.df["time"] = self.preprocess_time()
         self.data_start = settings.data_start

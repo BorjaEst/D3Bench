@@ -12,15 +12,6 @@ from d3bench import utils
 class KSWIN(utils.BaseTestMethod):
     """Kolmogorov-Smirnov Windowing detector."""
 
-    @property
-    def info(self) -> utils.DetectorInformation:
-        return utils.DetectorInformation(
-            multivariate_detector=True,
-            fit_method=False,
-            detector_type="Concept drift",
-            operation_type="Batch",
-        )
-
     def __init__(self, features: list[str]) -> None:
         metrics = [DataDriftPreset(stattest="ks")]
         self.report = report.Report(metrics)

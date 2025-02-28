@@ -6,32 +6,31 @@ including the buildings to benchmark, the criteria to test, the tools to use,
 whether to run on a VM, the dataset to use, and the logging level.
 """
 
+import datetime as dt
 import logging
 from typing import Literal, TypeAlias
 
 from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import SettingsConfigDict
 from rich import print  # pylint: disable=redefined-builtin
 from rich.logging import RichHandler
 
-from d3bench import DATASETS, TOOLS, utils
-from d3bench.benchmark import BenchmarkOptions, run_tools
-from d3bench.config import Dataset, Framework
-from d3bench.dataset import DatasetOptions
-from d3bench.tools import ToolOptions
+import d3bench
+from d3bench import benchmarks, datasets, tools
+from d3bench.config import Datafile, Framework
 
 # pylint: disable=too-few-public-methods
 
 
-LogLevel: TypeAlias = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+LogLevel: TypeAlias = Literal["debug", "info", "warning", "error", "critical"]
 logger = logging.getLogger(__name__)
 
 
-class RunSettings(BenchmarkOptions, DatasetOptions, ToolOptions):
+class RunSettings(benchmarks.Options, datasets.Options, tools.Options):
     """Settings to run a benchmark."""
 
 
-class Arguments(RunSettings, BaseSettings):
+class Arguments(RunSettings, d3bench.ResultsOptions):
     """
     This module provides a command-line interface to run D3Bench benchmarks.
 
@@ -48,19 +47,20 @@ class Arguments(RunSettings, BaseSettings):
 
     # Logging and reporting
     log_level: LogLevel = Field(
-        default="INFO",
+        default="info",
         description="Logging level.",
     )
     tools: set[Framework] = Field(
-        default=set(["Frouros", "Evidently", "NannyML", "Alibi-Detect"]),
+        # default=set(["Frouros", "Evidently", "NannyML", "Alibi-Detect"]),
+        default=set(["Frouros"]),
         description="List of tools to benchmark.",
     )
-    dataset: Dataset = Field(
+    datafile: Datafile = Field(
         default="energy",
-        description="Dataset to use.",
+        description="Dataset file name to use.",
     )
-    results_file: str = Field(
-        default="results.json",
+    output: str = Field(
+        default=f"results{dt.datetime.now().strftime('%Y%m%d%H%M%S')}",
         description="File to save the results to.",
     )
 
@@ -79,18 +79,15 @@ def main(args: Arguments) -> None:
 
     # Load dataset and tools from the arguments
     logger.debug("Call arguments: %s", args)
-    data = DATASETS[args.dataset].split_data()
-    tools = [TOOLS[tool] for tool in args.tools]
+    data = d3bench.DATASETS[args.datafile].split_data()
+    _tools = [d3bench.TOOLS[tool](data, args) for tool in args.tools]
 
     # Run the benchmark with the given parameters
     print("------ Benchmark execution in progress ------")
-    results = run_tools(tools, data, args)
-
-    # Print the results to the console
-    print(results)
+    results = [d3bench.Results(tool, args) for tool in _tools]
 
     # Save the results to a file
-    utils.save_results(results, args.results_file)
+    d3bench.save_results(results, args.output)
 
     # Print the benchmark end message
     print("---------Benchmark execution completed-------")

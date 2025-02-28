@@ -11,6 +11,8 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 from pydantic import BaseModel, Field, field_validator
 from pydantic.json import pydantic_encoder
+from d3bench.benchmarks import Benchmark
+from d3bench.config import Criteria
 
 from d3bench import config, methods
 
@@ -40,6 +42,15 @@ class TestInformation(BaseModel):
         if v <= 0:
             raise ValueError(f"{v} must be positive")
         return v
+
+    def __init__(self, benchmark: Benchmark) -> None:
+        super().__init__(
+            framework=benchmark.tool,
+            run_on_vm=benchmark.run_on_vm,
+            repetitions=benchmark.repetitions,
+            len_traindata=benchmark.x_reference.shape[0],
+            len_testdata=benchmark.x_test.shape[0],
+        )
 
 
 class Stats(BaseModel):
@@ -82,10 +93,25 @@ class Report(BaseModel):
     test_information: TestInformation  # information about the test method
     runtime: Optional[Stats] = None  # runtime statistics
     cputime: Optional[Stats] = None  # runtime statistics
-    ram: Optional[Stats] = None  # runtime statistics
+    memory: Optional[Stats] = None  # runtime statistics
 
     class Config:  # pylint: disable=missing-class-docstring
         json_encoders = {dt.datetime: lambda v: v.isoformat()}
+
+    def __init__(self, criteria: set[Criteria], benchmark: Benchmark) -> None:
+        stats: dict[Criteria, Any] = {}  # dictionary to store statistics
+        if "runtime" in criteria:
+            stats["runtime"] = Stats.from_values(benchmark.get_runtimes())
+        if "cputime" in criteria:
+            stats["cputime"] = Stats.from_values(benchmark.get_cputimes())
+        if "memory" in criteria:
+            stats["memory"] = Stats.from_values(benchmark.get_memories())
+        super().__init__(
+            test_information=TestInformation(benchmark),
+            runtime=stats.get("runtime", None),
+            cputime=stats.get("cputime", None),
+            memory=stats.get("memory", None),
+        )
 
     def to_json(self) -> str:
         """Serialize report to JSON."""
@@ -109,6 +135,13 @@ class OnlineCDReport(Report):
     f1_score: Optional[float] = Field(None, ge=0.0, le=1.0)
     adaptation_time: Optional[Stats] = None  # time to adapt after drift
     auc_score: Optional[float] = Field(None, ge=0.0, le=1.0)  # area under ROC
+
+    def __init__(self, criteria: set[Criteria], benchmark: Benchmark) -> None:
+        super().__init__(criteria, benchmark)
+        if not isinstance(benchmark.method, methods.OnlineCD):
+            raise ValueError("Method must be an OnlineCD instance")
+        self.method = benchmark.method
+        # TODO: add the rest of the metrics
 
     @classmethod
     def detect_report_type(cls, data: Dict) -> bool:
@@ -136,6 +169,13 @@ class OnlineDDReport(Report):
     processing_time_per_sample: Optional[Stats] = None  # comp. efficiency
     test_statistics: Optional[Dict[str, Any]] = None  # method-specific stats
 
+    def __init__(self, criteria: set[Criteria], benchmark: Benchmark) -> None:
+        super().__init__(criteria, benchmark)
+        if not isinstance(benchmark.method, methods.OnlineDD):
+            raise ValueError("Method must be an OnlineDD instance")
+        self.method = benchmark.method
+        # TODO: add the rest of the metrics
+
     @classmethod
     def detect_report_type(cls, data: Dict) -> bool:
         """Detect if the data represents this report type."""
@@ -162,6 +202,13 @@ class BatchCDReport(Report):
     drift_location: Optional[Union[int, List[int]]] = None  # est. drift pos.
     testing_power: Optional[float] = Field(None, ge=0.0, le=1.0)  # sta. power
 
+    def __init__(self, criteria: set[Criteria], benchmark: Benchmark) -> None:
+        super().__init__(criteria, benchmark)
+        if not isinstance(benchmark.method, methods.BatchCD):
+            raise ValueError("Method must be a BatchCD instance")
+        self.method = benchmark.method
+        # TODO: add the rest of the metrics
+
     @classmethod
     def detect_report_type(cls, data: Dict) -> bool:
         """Detect if the data represents this report type."""
@@ -187,6 +234,13 @@ class BatchDDReport(Report):
     p_value: Optional[float] = Field(None, ge=0.0, le=1.0)  # significance
     effect_size: Optional[float] = None  # magnitude of the effect
     confidence_interval: Optional[tuple] = None  # confidence interval
+
+    def __init__(self, criteria: set[Criteria], benchmark: Benchmark) -> None:
+        super().__init__(criteria, benchmark)
+        if not isinstance(benchmark.method, methods.BatchDD):
+            raise ValueError("Method must be a BatchDD instance")
+        self.method = benchmark.method
+        # TODO: add the rest of the metrics
 
     @field_validator("confidence_interval")
     @classmethod

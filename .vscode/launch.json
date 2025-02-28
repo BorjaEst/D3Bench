@@ -8,12 +8,7 @@
             "name": "python -m d3bench",
             "type": "debugpy",
             "request": "launch",
-            "module": "d3bench",
-            "args": [
-                "--log_level=DEBUG",
-                "--criteria=[FUNCTIONAL]",
-                "--tools=[Frouros,Evidently,NannyML]"
-            ],
+            "module": "d3bench"
         }
     ]
 }
