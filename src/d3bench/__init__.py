@@ -3,6 +3,7 @@ This module contains the configuration of the datasets and tools used in the
 benchmarking process.
 """
 
+import dataclasses as dc
 import json
 from pathlib import Path
 from typing import Sequence, Type
@@ -10,11 +11,15 @@ from typing import Sequence, Type
 from pydantic import BaseModel, Field
 from pydantic.json import pydantic_encoder
 
-from d3bench import benchmarks, config, datasets, methods, reports, tools
+from d3bench import benchmarks, config, datasets, reports, tools
 from d3bench.benchmarks import Benchmark
-from d3bench.config import Criteria, Datafile, Framework, Method
+from d3bench.config import Criteria, Datafile, Framework
 from d3bench.datasets import Dataset
+from d3bench.methods import BatchCD, BatchDD, OnlineCD, OnlineDD
 from d3bench.tools import Tool
+
+# pylint: disable=too-few-public-methods
+
 
 # Initialize the datasets constant
 DATASETS: dict[Datafile, Dataset] = {
@@ -40,6 +45,20 @@ class ResultsOptions(benchmarks.Options):
     )
 
 
+@dc.dataclass(init=False)
+class RunArgs:
+    """Data class to store the data used in the benchmark."""
+
+    criteria: set[Criteria]
+    tool: Tool
+    benchmark_options: benchmarks.Options
+
+    def __init__(self, tool: Tool, options: ResultsOptions) -> None:
+        self.tool = tool
+        self.benchmark_options = options
+        self.criteria = options.criteria
+
+
 class Results(BaseModel):
     """Data class to store the results of the benchmark."""
 
@@ -49,23 +68,12 @@ class Results(BaseModel):
     batch_dd: list[reports.BatchDDReport]
 
     def __init__(self, tool: Tool, options: ResultsOptions) -> None:
+        args = RunArgs(tool, options)  # Parse the arguments
         super().__init__(
-            online_cd=[
-                online_cd_report(options.criteria, tool, method, options)
-                for method in tool.online_cd_methods
-            ],
-            online_dd=[
-                online_dd_report(options.criteria, tool, method, options)
-                for method in tool.online_dd_methods
-            ],
-            batch_cd=[
-                batch_cd_report(options.criteria, tool, method, options)
-                for method in tool.batch_cd_methods
-            ],
-            batch_dd=[
-                batch_dd_report(options.criteria, tool, method, options)
-                for method in tool.batch_dd_methods
-            ],
+            online_cd=[online_cd(m, args) for m in tool.online_cd_methods],
+            online_dd=[online_dd(m, args) for m in tool.online_dd_methods],
+            batch_cd=[batch_cd(m, args) for m in tool.batch_cd_methods],
+            batch_dd=[batch_dd(m, args) for m in tool.batch_dd_methods],
         )
 
     def to_json(self) -> str:
@@ -74,52 +82,36 @@ class Results(BaseModel):
         return json.dumps(self, **options)
 
 
-def online_cd_report(
-    criteria: set[Criteria],
-    tool: Tool,
-    method: methods.OnlineCD,
-    options: benchmarks.Options,
-) -> reports.OnlineCDReport:
+def online_cd(method: OnlineCD, args: RunArgs) -> reports.OnlineCDReport:
     """Run an online supervised concept drift detection benchmark."""
-    tool_test = tool.online_cd_methods[method]
-    _benchmark = Benchmark(method, tool, tool_test, options)
-    return reports.OnlineCDReport(criteria, _benchmark)
+    tool_test = args.tool.online_cd_methods[method]
+    options = args.benchmark_options
+    _benchmark = Benchmark(method, args.tool, tool_test, options)
+    return reports.OnlineCDReport(args.criteria, _benchmark)
 
 
-def online_dd_report(
-    criteria: set[Criteria],
-    tool: Tool,
-    method: methods.OnlineDD,
-    options: benchmarks.Options,
-) -> reports.OnlineDDReport:
+def online_dd(method: OnlineDD, args: RunArgs) -> reports.OnlineDDReport:
     """Run an online unsupervised concept drift detection benchmark."""
-    tool_test = tool.online_dd_methods[method]
-    _benchmark = Benchmark(method, tool, tool_test, options)
-    return reports.OnlineDDReport(criteria, _benchmark)
+    tool_test = args.tool.online_dd_methods[method]
+    options = args.benchmark_options
+    _benchmark = Benchmark(method, args.tool, tool_test, options)
+    return reports.OnlineDDReport(args.criteria, _benchmark)
 
 
-def batch_cd_report(
-    criteria: set[Criteria],
-    tool: Tool,
-    method: methods.BatchCD,
-    options: benchmarks.Options,
-) -> reports.BatchCDReport:
+def batch_cd(method: BatchCD, args: RunArgs) -> reports.BatchCDReport:
     """Run a batch supervised concept drift detection benchmark."""
-    tool_test = tool.batch_cd_methods[method]
-    _benchmark = Benchmark(method, tool, tool_test, options)
-    return reports.BatchCDReport(criteria, _benchmark)
+    tool_test = args.tool.batch_cd_methods[method]
+    options = args.benchmark_options
+    _benchmark = Benchmark(method, args.tool, tool_test, options)
+    return reports.BatchCDReport(args.criteria, _benchmark)
 
 
-def batch_dd_report(
-    criteria: set[Criteria],
-    tool: Tool,
-    method: methods.BatchDD,
-    options: benchmarks.Options,
-) -> reports.BatchDDReport:
+def batch_dd(method: BatchDD, args: RunArgs) -> reports.BatchDDReport:
     """Run a batch unsupervised concept drift detection benchmark."""
-    tool_test = tool.batch_dd_methods[method]
-    _benchmark = Benchmark(method, tool, tool_test, options)
-    return reports.BatchDDReport(criteria, _benchmark)
+    tool_test = args.tool.batch_dd_methods[method]
+    options = args.benchmark_options
+    _benchmark = Benchmark(method, args.tool, tool_test, options)
+    return reports.BatchDDReport(args.criteria, _benchmark)
 
 
 def save_results(results: list[Results], output: str) -> None:

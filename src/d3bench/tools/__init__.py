@@ -71,6 +71,7 @@ class Frouros(Tool):
         methods.OnlineCD.KSWIN: tools_frouros.KSWIN,
     }
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
+    batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -84,6 +85,7 @@ class Evidently(Tool):
     name: Framework = "Evidently"
     online_cd_methods: dict[methods.OnlineCD, Any] = {}
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
+    batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -97,6 +99,7 @@ class NannyML(Tool):
     name: Framework = "NannyML"
     online_cd_methods: dict[methods.OnlineCD, Any] = {}
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
+    batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -109,6 +112,7 @@ class AlibiDetect(Tool):
     name: Framework = "Alibi-Detect"
     online_cd_methods: dict[methods.OnlineCD, Any] = {}
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
+    batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:

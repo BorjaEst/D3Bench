@@ -15,8 +15,6 @@ from d3bench.tools import Tool
 from d3bench.utils import BaseTestMethod
 
 # pylint: disable=too-few-public-methods
-
-
 logger = logging.getLogger(__name__)
 
 
