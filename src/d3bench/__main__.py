@@ -52,7 +52,7 @@ class Arguments(RunSettings, d3bench.ResultsOptions):
     )
     tools: set[Framework] = Field(
         # default=set(["Frouros", "Evidently", "NannyML", "Alibi-Detect"]),
-        default=set(["Frouros"]),
+        default=set(["Frouros", "Evidently", "NannyML"]),
         description="List of tools to benchmark.",
     )
     datafile: Datafile = Field(

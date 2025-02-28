@@ -3,36 +3,43 @@
 from typing import Any
 
 import pandas as pd
-from evidently.metric_preset import DataDriftPreset
-from evidently import report
+from evidently import ColumnMapping
+from evidently.test_suite import TestSuite
+from evidently.tests import TestColumnDrift
 
 from d3bench import utils
 
 
-class KSWIN(utils.BaseTestMethod):
-    """Kolmogorov-Smirnov Windowing detector."""
+# Online Supervised Concept Drift Detection
+
+
+# Online Unsupervised Data Drift Detection
+
+
+# Batch Concept Drift Detection
+
+
+# Batch Data Drift Detection
+
+
+class KSTest(utils.BaseTestMethod):
+    """Kolmogorov-Smirnov Test"""
 
     def __init__(self, features: list[str]) -> None:
-        metrics = [DataDriftPreset(stattest="ks")]
-        self.report = report.Report(metrics)
-        self._run_test: Any = None
+        tests = [TestColumnDrift(feature) for feature in features]
+        self.test_suite = TestSuite(tests)
+        self.kwds = {
+            "column_mapping": ColumnMapping(),
+            "reference_data": None,
+        }
 
     def fit(self, x_reference: pd.DataFrame) -> None:
         # No train method separated from the test method in Evidetly
-        self._run_test = lambda x: self.report.run(
-            reference_data=x_reference, current_data=x
-        )
+        self.kwds["reference_data"] = x_reference
         raise NotImplementedError(f"No train for {self.__class__}")
 
     def test(self, x_test: pd.DataFrame) -> None:
-        self._run_test(x_test)
+        self.test_suite.run(current_data=x_test, **self.kwds)
 
     def result(self) -> dict[str, Any]:
-        result = self.report.as_dict()["metrics"][1]["result"]
-        return {
-            "drift_detected": result["dataset_drift"],
-            "p_values": {
-                column: values["drift_score"]
-                for column, values in result["drift_by_columns"].items()
-            },
-        }
+        return self.test_suite.as_dict()

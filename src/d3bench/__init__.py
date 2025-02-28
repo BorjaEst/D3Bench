@@ -30,9 +30,9 @@ DATASETS: dict[Datafile, Dataset] = {
 # Initialize the tools constant
 TOOLS: dict[Framework, Type[Tool]] = {
     "Frouros": tools.Frouros,
-    # "Evidently": tools.Evidently,
-    # "NannyML": tools.NannyML,
-    # "Alibi-Detect": tools.AlibiDetect,
+    "Evidently": tools.Evidently,
+    "NannyML": tools.NannyML,
+    "Alibi-Detect": tools.AlibiDetect,
 }
 
 
@@ -40,7 +40,7 @@ class ResultsOptions(benchmarks.Options):
     """Settings to run a benchmark and save the results."""
 
     criteria: set[Criteria] = Field(
-        default=set(["functional", "runtime", "cputime", "memory"]),
+        default=set(["runtime", "cputime", "memory"]),
         description="List of criteria to test.",
     )
 
@@ -129,7 +129,19 @@ def save_results(results: list[Results], output: str) -> None:
 
 def _save(results: Sequence[reports.Report], file_name: Path) -> None:
     options = {"indent": 4, "default": pydantic_encoder}
-    results_json = json.dumps(results, **options)
-    with open(file_name, "a", encoding="utf-8") as file:
+
+    # Read existing data if the file exists
+    if file_name.exists():
+        with open(file_name, "r", encoding="utf-8") as file:
+            existing_data = json.load(file)
+    else:
+        existing_data = []
+
+    # Append new results to existing data
+    existing_data.extend(results)
+
+    # Write updated data back to the file
+    results_json = json.dumps(existing_data, **options)
+    with open(file_name, "w", encoding="utf-8") as file:
         file.write(results_json)
         file.write("\n")

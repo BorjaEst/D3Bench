@@ -9,10 +9,9 @@ from memory_profiler import memory_usage
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
-from d3bench.config import Data
 from d3bench.methods import BatchCD, BatchDD, OnlineCD, OnlineDD
 from d3bench.tools import Tool
-from d3bench.utils import BaseTestMethod
+from d3bench.utils import BaseTestMethod, Data
 
 # pylint: disable=too-few-public-methods
 logger = logging.getLogger(__name__)
@@ -39,7 +38,7 @@ class Benchmark:
         self,
         method: Union[OnlineCD, OnlineDD, BatchCD, BatchDD],
         tool: Tool,
-        tool_test: Type[BaseTestMethod],
+        test: Type[BaseTestMethod],
         options: Optional[Options] = None,
     ) -> None:
         options = options or Options()
@@ -47,19 +46,21 @@ class Benchmark:
         self.run_on_vm = options.on_vm
         self.method = method
         self.tool = tool
-        self.tool_test = tool_test
-        self.x_reference = tool.data["x_reference"].copy()
-        self.x_test = tool.data["x_test"].copy()
-        self.job = Job(tool_test, self.data)
-        self.job.fit()  # Fit the model
+        self.test = test
+        self.job = Job(self)
+        self.fit_job()
 
     @property
     def data(self) -> Data:
         """Return the data used in the benchmark."""
-        return {
-            "x_reference": self.x_reference,
-            "x_test": self.x_test,
-        }
+        return self.tool.data
+
+    def fit_job(self) -> None:
+        """Fit the job for the benchmark."""
+        try:
+            self.job.fit()
+        except NotImplementedError:
+            logger.debug("No train method for %s", self.method)
 
     def get_runtimes(self) -> list[float]:
         """
@@ -107,20 +108,19 @@ class Benchmark:
 class Job:
     """Class to run a benchmark job with the given parameters."""
 
-    def __init__(self, tool_test: Type[BaseTestMethod], data: Data) -> None:
-        # Prepare the job for the benchmark, copy to avoid side effects
-        self.x_reference = data["x_reference"]
-        self.x_test = data["x_test"]
-        self.features = self.x_reference.columns
-        self.detector = tool_test(self.features)
+    def __init__(self, benchmark: Benchmark) -> None:
+        self.benchmark = benchmark
+        self.detector = benchmark.test(benchmark.tool.data.features)
 
     def fit(self) -> None:
         """Run the benchmark with the given parameters."""
-        self.detector.fit(self.x_reference)
+        # Call tool.reference_data to ensure preprocessing
+        self.detector.fit(self.benchmark.tool.reference_data)  # Cached
 
     def test(self) -> None:
         """Run the benchmark with the given parameters."""
-        self.detector.test(self.x_test)
+        # Call tool.testing_data to ensure preprocessing
+        self.detector.test(self.benchmark.tool.testing_data)
 
     @property
     def results(self) -> dict[str, Any]:

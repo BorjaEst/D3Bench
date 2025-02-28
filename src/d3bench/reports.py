@@ -31,15 +31,15 @@ class TestInformation:
     framework: Framework  # tool used in the benchmark
     run_on_vm: bool  # run on a VM
     repetitions: int  # number of repetitions
-    len_traindata: int  # length of the training data
-    len_testdata: int  # length of the test data
+    len_reference: int  # length of the training data
+    len_testing: int  # length of the test data
 
     def __init__(self, benchmark: Benchmark) -> None:
         self.framework = benchmark.tool.name
         self.run_on_vm = benchmark.run_on_vm
         self.repetitions = benchmark.repetitions
-        self.len_traindata = benchmark.x_reference.shape[0]
-        self.len_testdata = benchmark.x_test.shape[0]
+        self.len_reference = benchmark.data.len_reference
+        self.len_testing = benchmark.data.len_testing
 
 
 @dc.dataclass(init=False)

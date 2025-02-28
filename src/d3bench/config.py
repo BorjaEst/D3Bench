@@ -4,9 +4,10 @@ import os
 from pathlib import Path
 from typing import Literal, TypeAlias, Union
 
-import pandas as pd
-
 from d3bench import methods
+
+# pylint: disable=too-few-public-methods
+
 
 # Path where the data is stored
 DATA_PATH = os.getenv("DATA_PATH", "datafiles")
@@ -33,15 +34,14 @@ Framework: TypeAlias = Literal[
 ]
 
 # Define the available datasets for the benchmark
-Data: TypeAlias = dict[Literal["x_reference", "x_test"], pd.DataFrame]
 Datafile: TypeAlias = Literal[
     "energy",
     "occupancy",
 ]
 
+
 # Define the criteria evaluations for the benchmark
 Criteria: TypeAlias = Literal[
-    "functional",
     "runtime",
     "cputime",
     "memory",

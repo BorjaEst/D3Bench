@@ -7,7 +7,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 
 from d3bench import config
-from d3bench.config import Data
+from d3bench.utils import Data
 
 # pylint: disable=too-few-public-methods
 
@@ -59,10 +59,11 @@ class Dataset(ABC):
         """Return the dataset for the given building."""
         boundary_timestamp = pd.Timestamp(self.boundary)
         train_filter = self.df["time"] < boundary_timestamp
-        return {
-            "x_reference": self.df[train_filter],
-            "x_test": self.df[~train_filter],
-        }
+        return Data(
+            features=self.measure_columns,
+            reference=self.df[train_filter],
+            testing=self.df[~train_filter],
+        )
 
 
 class DataEnergy(Dataset):

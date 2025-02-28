@@ -2,6 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
+from functools import cached_property
 from typing import Any, Optional
 
 import pandas as pd
@@ -13,7 +14,8 @@ import d3bench.tools.evidently as tools_evidently
 import d3bench.tools.frouros as tools_frouros
 import d3bench.tools.nannyml as tools_nannyml
 from d3bench import methods
-from d3bench.config import Data, Framework
+from d3bench.config import Framework
+from d3bench.utils import Data
 
 # pylint: disable=too-few-public-methods
 
@@ -42,8 +44,7 @@ class Tool(ABC):
 
     def __init__(self, data: Data, settings: Optional[Options] = None):
         settings = settings or Options()
-        self.x_reference = self.preprocess(data["x_reference"].copy())
-        self.x_test = self.preprocess(data["x_test"].copy())
+        self.data = data
 
     @abstractmethod
     def preprocess(self, df: pd.DataFrame) -> Any:
@@ -54,29 +55,31 @@ class Tool(ABC):
         """Call to the preprocess method with a copy of the data."""
         return self.preprocess(df.copy())
 
-    @property
-    def data(self) -> Data:
-        """Return the data used for drift detection."""
-        return {
-            "x_reference": self.x_reference,
-            "x_test": self.x_test,
-        }
+    @cached_property
+    def reference_data(self) -> Any:
+        """Return the reference data."""
+        return self.preprocess(self.data.reference.copy())
+
+    @cached_property
+    def testing_data(self) -> Any:
+        """Return the testing data."""
+        return self.preprocess(self.data.testing.copy())
 
 
 class Frouros(Tool):
     """Frouros drift detection tool."""
 
     name: Framework = "Frouros"
-    online_cd_methods: dict[methods.OnlineCD, Any] = {
-        methods.OnlineCD.KSWIN: tools_frouros.KSWIN,
-    }
+    online_cd_methods: dict[methods.OnlineCD, Any] = {}
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
-    batch_dd_methods: dict[methods.BatchDD, Any] = {}
+    batch_dd_methods: dict[methods.BatchDD, Any] = {
+        methods.BatchDD.KS: tools_frouros.KSTest,
+    }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df.drop(columns={"time"}, inplace=True)
-        return df
+        return [df[feature].to_numpy() for feature in df.columns]
 
 
 class Evidently(Tool):
@@ -86,7 +89,9 @@ class Evidently(Tool):
     online_cd_methods: dict[methods.OnlineCD, Any] = {}
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
-    batch_dd_methods: dict[methods.BatchDD, Any] = {}
+    batch_dd_methods: dict[methods.BatchDD, Any] = {
+        methods.BatchDD.KS: tools_evidently.KSTest,
+    }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df.drop(columns={"time"}, inplace=True)
@@ -100,7 +105,9 @@ class NannyML(Tool):
     online_cd_methods: dict[methods.OnlineCD, Any] = {}
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
-    batch_dd_methods: dict[methods.BatchDD, Any] = {}
+    batch_dd_methods: dict[methods.BatchDD, Any] = {
+        methods.BatchDD.KS: tools_nannyml.KSTest,
+    }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         return df  # No preprocessing needed
@@ -113,7 +120,9 @@ class AlibiDetect(Tool):
     online_cd_methods: dict[methods.OnlineCD, Any] = {}
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
-    batch_dd_methods: dict[methods.BatchDD, Any] = {}
+    batch_dd_methods: dict[methods.BatchDD, Any] = {
+        # methods.BatchDD.KS: tools_alibi.KSTest,
+    }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError
