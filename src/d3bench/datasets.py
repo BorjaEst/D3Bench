@@ -59,7 +59,10 @@ class Dataset(ABC):
         """Return the dataset for the given building."""
         boundary_timestamp = pd.Timestamp(self.boundary)
         train_filter = self.df["time"] < boundary_timestamp
-        return self.df[train_filter], self.df[~train_filter]
+        return {
+            "x_reference": self.df[train_filter],
+            "x_test": self.df[~train_filter],
+        }
 
 
 class DataEnergy(Dataset):
