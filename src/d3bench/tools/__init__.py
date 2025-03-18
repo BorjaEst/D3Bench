@@ -13,7 +13,7 @@ import d3bench.tools.alibi as tools_alibi
 import d3bench.tools.evidently as tools_evidently
 import d3bench.tools.frouros as tools_frouros
 import d3bench.tools.nannyml as tools_nannyml
-from d3bench import  methods
+from d3bench import methods
 from d3bench.config import Criteria, Framework
 from d3bench.reports import Report
 from d3bench.utils import Data
@@ -76,7 +76,21 @@ class Frouros(Tool):
     """Frouros drift detection tool."""
 
     name: Framework = "Frouros"
-    online_cd_methods: dict[methods.OnlineCD, Any] = {}
+    online_cd_methods: dict[methods.OnlineCD, Any] = {
+        methods.OnlineCD.BOCD: tools_frouros.BOCD,
+        methods.OnlineCD.CUSUM: tools_frouros.CUSUM,
+        methods.OnlineCD.GMA: tools_frouros.GMA,
+        methods.OnlineCD.PHT: tools_frouros.PHT,
+        methods.OnlineCD.DDM: tools_frouros.DDM,
+        methods.OnlineCD.ECDDWT: tools_frouros.ECDDWT,
+        methods.OnlineCD.EDDM: tools_frouros.EDDM,
+        methods.OnlineCD.HDDM_A: tools_frouros.HDDM_A,
+        methods.OnlineCD.HDDM_W: tools_frouros.HDDM_W,
+        methods.OnlineCD.RDDM: tools_frouros.RDDM,
+        methods.OnlineCD.ADWIN: tools_frouros.ADWIN,
+        methods.OnlineCD.KSWIN: tools_frouros.KSWIN,
+        methods.OnlineCD.STEPD: tools_frouros.STEPD,
+    }
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {

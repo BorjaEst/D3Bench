@@ -86,7 +86,7 @@ class BaseBenchmark(ABC):
                 len_testing=len(self.data.testing),
             ),
             method=str(self.method),
-            method_class=str(self.test.__class__),
+            method_class=str(self.test),
         )
 
 

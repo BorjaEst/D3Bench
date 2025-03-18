@@ -76,7 +76,7 @@ def main(args: Arguments) -> None:
     data = d3bench.DATASETS[args.datafile].split_data()
     tools = [d3bench.TOOLS[tool](data) for tool in args.tools]
 
-    logger.info("Running the benchmark with the given criteria")
+    logger.info("Loading the benchmarks with the given criteria")
     logger.debug("Criteria: %s", args.criteria)
     results = d3bench.Results(tools, args.criteria)
     logger.debug("Results: %s", results)
