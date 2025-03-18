@@ -3,66 +3,112 @@
 import logging
 import time
 import timeit
-from typing import Any, Optional, Type, Union
+from abc import ABC, abstractmethod
+from copy import copy
+from functools import cached_property
+from typing import Any, Generator, Optional, Type, TypeAlias, Union
 
 from memory_profiler import memory_usage
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
-from d3bench.methods import BatchCD, BatchDD, OnlineCD, OnlineDD
+from d3bench import reports
+from d3bench.config import Criteria, Method
+from d3bench.reports import Report, TestInformation
 from d3bench.tools import Tool
 from d3bench.utils import BaseTestMethod, Data
 
 # pylint: disable=too-few-public-methods
 logger = logging.getLogger(__name__)
+Test: TypeAlias = Type[BaseTestMethod]
 
 
-class Options(BaseSettings):
-    """Settings to run a benchmark."""
+class BaseBenchmark(ABC):
+    """Base class to define benchmarks to obtain Results."""
 
-    repetitions: int = Field(
-        default=3,
-        description="Number of repetitions for the benchmark.",
-    )
-
-    on_vm: bool = Field(
-        default=False,
-        description="Flag to run the benchmark on a VM.",
-    )
-
-
-class Benchmark:
-    """Class to run a benchmark to obtain Results."""
-
-    def __init__(
-        self,
-        method: Union[OnlineCD, OnlineDD, BatchCD, BatchDD],
-        tool: Tool,
-        test: Type[BaseTestMethod],
-        options: Optional[Options] = None,
-    ) -> None:
-        options = options or Options()
-        self.repetitions = options.repetitions
-        self.run_on_vm = options.on_vm
+    def __init__(self, method: Method, test: Test, tool: Tool) -> None:
         self.method = method
-        self.tool = tool
         self.test = test
-        self.job = Job(self)
-        self.fit_job()
+        self.tool = tool
+        self.job = Job(benchmark=self)
+        self._prepare_job()
 
     @property
     def data(self) -> Data:
         """Return the data used in the benchmark."""
         return self.tool.data
 
-    def fit_job(self) -> None:
+    @property
+    def repetitions(self) -> int:
+        """Return the number of repetitions for the benchmark."""
+        return self.tool.settings.repetitions
+
+    @property
+    def run_on_vm(self) -> bool:
+        """Return whether the benchmark was run on a VM."""
+        return self.tool.settings.on_vm
+
+    def _prepare_job(self) -> None:
         """Fit the job for the benchmark."""
         try:
             self.job.fit()
         except NotImplementedError:
             logger.debug("No train method for %s", self.method)
 
-    def get_runtimes(self) -> list[float]:
+    @abstractmethod
+    def get_results(self) -> dict[str, Any]:
+        """Return the drift statistics of the job."""
+
+    @abstractmethod
+    def get_runtimes(self) -> reports.Stats:
+        """Run the benchmark for the RUNTIME criterion."""
+
+    @abstractmethod
+    def get_cputimes(self) -> reports.Stats:
+        """Run the benchmark for the CPUTIME criterion."""
+
+    @abstractmethod
+    def get_memories(self) -> reports.Stats:
+        """Run the benchmark for the MEMORY criterion."""
+
+    def report(self, criteria: set[Criteria]) -> Report:
+        """Return the drift detection values."""
+        # TODO: Future implementation; add results to report types
+        return reports.Report(
+            runtime=self.get_runtimes() if "runtime" in criteria else None,
+            cputime=self.get_cputimes() if "cputime" in criteria else None,
+            memory=self.get_memories() if "memory" in criteria else None,
+            test_information=TestInformation(
+                framework=self.tool.name,
+                run_on_vm=self.run_on_vm,
+                repetitions=self.repetitions,
+                len_reference=len(self.data.reference),
+                len_testing=len(self.data.testing),
+            ),
+            method=str(self.method),
+            method_class=str(self.test.__class__),
+        )
+
+
+class Benchmark(BaseBenchmark):
+    """Class to run a benchmark to obtain Results."""
+
+    def get_results(self) -> dict[str, Any]:
+        """
+        Return the drift statistics of the job.
+        Run the drift detection for the data.
+        """
+
+        # Copy the job to avoid modifying the original job
+        _job = self.job.copy()
+
+        # Run the drift detection for the data
+        _job.test()
+
+        # Return the drift statistics
+        return _job.results
+
+    def get_runtimes(self) -> reports.Stats:
         """
         Run the benchmark for the RUNTIME criterion.
         Measure elapsed time using wall-clock time in milliseconds.
@@ -74,9 +120,10 @@ class Benchmark:
         timer = timeit.Timer(self.job.test, timer=time.time)
 
         # Time runtimes measurements
-        return timer.repeat(self.repetitions, number=1)
+        times = timer.repeat(self.repetitions, number=1)
+        return reports.Stats.from_values(times)
 
-    def get_cputimes(self) -> list[float]:
+    def get_cputimes(self) -> reports.Stats:
         """
         Run the benchmark for the CPUTIME criterion.
         Measures CPU resources consumed by the process (user and system)
@@ -88,9 +135,10 @@ class Benchmark:
         timer = timeit.Timer(self.job.test, timer=time.process_time)
 
         # Time runtimes measurements
-        return timer.repeat(self.repetitions, number=1)
+        times = timer.repeat(self.repetitions, number=1)
+        return reports.Stats.from_values(times)
 
-    def get_memories(self) -> list[float]:
+    def get_memories(self) -> reports.Stats:
         """
         Run the benchmark for the MEMORY criterion.
         Measures RAM resources consumed by the process (user and system)
@@ -102,13 +150,26 @@ class Benchmark:
         rmem = [memory_usage(self.job.test) for _ in repeat]
 
         # Memory in run as the maximum memory used during the run
-        return [max(mem) for mem in rmem]
+        mems = [max(mem) for mem in rmem]
+        return reports.Stats.from_values(mems)
+
+
+def get_reports(tool: Tool, criteria: set[Criteria]) -> Generator[Report, None, None]:
+    """Return the drift detection values."""
+    for method, test in tool.online_cd_methods.items():
+        yield Benchmark(method, test, tool).report(criteria)
+    for method, test in tool.online_dd_methods.items():
+        yield Benchmark(method, test, tool).report(criteria)
+    for method, test in tool.batch_cd_methods.items():
+        yield Benchmark(method, test, tool).report(criteria)
+    for method, test in tool.batch_dd_methods.items():
+        yield Benchmark(method, test, tool).report(criteria)
 
 
 class Job:
     """Class to run a benchmark job with the given parameters."""
 
-    def __init__(self, benchmark: Benchmark) -> None:
+    def __init__(self, benchmark: BaseBenchmark) -> None:
         self.benchmark = benchmark
         self.detector = benchmark.test(benchmark.tool.data.features)
 
@@ -126,3 +187,9 @@ class Job:
     def results(self) -> dict[str, Any]:
         """Return the results of the benchmark."""
         return self.detector.result()
+
+    def copy(self) -> "Job":
+        """Return a copy of the job."""
+        job = copy(self)
+        job.detector = copy(self.detector)
+        return job

@@ -42,6 +42,7 @@ Datafile: TypeAlias = Literal[
 
 # Define the criteria evaluations for the benchmark
 Criteria: TypeAlias = Literal[
+    "accuracy",
     "runtime",
     "cputime",
     "memory",

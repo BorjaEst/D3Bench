@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import Any, Optional
+from typing import Any, Generator, Optional
 
 import pandas as pd
 from pydantic import Field
@@ -13,8 +13,9 @@ import d3bench.tools.alibi as tools_alibi
 import d3bench.tools.evidently as tools_evidently
 import d3bench.tools.frouros as tools_frouros
 import d3bench.tools.nannyml as tools_nannyml
-from d3bench import methods
-from d3bench.config import Framework
+from d3bench import  methods
+from d3bench.config import Criteria, Framework
+from d3bench.reports import Report
 from d3bench.utils import Data
 
 # pylint: disable=too-few-public-methods
@@ -26,9 +27,14 @@ logger = logging.getLogger(__name__)
 class Options(BaseSettings):
     """Settings to instantiate a tool."""
 
-    example_option: str = Field(
-        default="example",
-        description="Example option for tools.",
+    repetitions: int = Field(
+        default=3,
+        description="Number of repetitions for the benchmark.",
+    )
+
+    on_vm: bool = Field(
+        default=False,
+        description="Flag to run the benchmark on a VM.",
     )
 
 
@@ -43,7 +49,7 @@ class Tool(ABC):
     batch_dd_methods: dict[methods.BatchDD, Any]
 
     def __init__(self, data: Data, settings: Optional[Options] = None):
-        settings = settings or Options()
+        self.settings = settings or Options()
         self.data = data
 
     @abstractmethod
