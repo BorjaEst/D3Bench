@@ -15,11 +15,11 @@ import d3bench.tools.evidently as tools_evidently
 import d3bench.tools.frouros as tools_frouros
 import d3bench.tools.nannyml as tools_nannyml
 from d3bench import methods
-from d3bench.config import Criteria, Framework
-from d3bench.reports import Report
+from d3bench.config import Framework
 from d3bench.utils import Data
 
 # pylint: disable=too-few-public-methods
+# pylint: disable=line-too-long
 
 
 logger = logging.getLogger(__name__)
@@ -78,43 +78,43 @@ class Frouros(Tool):
 
     name: Framework = "Frouros"
     online_cd_methods: dict[methods.OnlineCD, Any] = {
-        methods.OnlineCD.BOCD: tools_frouros.BOCD,
-        methods.OnlineCD.CUSUM: tools_frouros.CUSUM,
-        methods.OnlineCD.GMA: tools_frouros.GMA,
-        methods.OnlineCD.PHT: tools_frouros.PHT,
-        methods.OnlineCD.DDM: tools_frouros.DDM,
-        methods.OnlineCD.ECDDWT: tools_frouros.ECDDWT,
-        methods.OnlineCD.EDDM: tools_frouros.EDDM,
-        methods.OnlineCD.HDDM_A: tools_frouros.HDDM_A,
-        methods.OnlineCD.HDDM_W: tools_frouros.HDDM_W,
-        methods.OnlineCD.RDDM: tools_frouros.RDDM,
-        methods.OnlineCD.ADWIN: tools_frouros.ADWIN,
-        methods.OnlineCD.KSWIN: tools_frouros.KSWIN,
-        methods.OnlineCD.STEPD: tools_frouros.STEPD,
+        methods.OnlineCD.BAYESIAN_ONLINE_CHANGE_DETECTION: tools_frouros.BayesianOnlineChangeDetection,
+        methods.OnlineCD.CUMULATIVE_SUM_CONTROL_CHART: tools_frouros.CumulativeSumControlChart,
+        methods.OnlineCD.GEOMETRIC_MOVING_AVERAGE: tools_frouros.GeometricMovingAverage,
+        methods.OnlineCD.PAGE_HINKLEY_TEST: tools_frouros.PageHinkleyTest,
+        methods.OnlineCD.DRIFT_DETECTION_METHOD: tools_frouros.DriftDetectionMethod,
+        methods.OnlineCD.EWMA_CONCEPT_DRIFT_DETECTION_WARNING: tools_frouros.EWMAConceptDriftDetectionWarning,
+        methods.OnlineCD.EARLY_DRIFT_DETECTION_METHOD: tools_frouros.EarlyDriftDetectionMethod,
+        methods.OnlineCD.HOEFFDING_DRIFT_DETECTION_METHOD_TEST_A: tools_frouros.HoeffdingDriftDetectionMethodTestA,
+        methods.OnlineCD.HOEFFDING_DRIFT_DETECTION_METHOD_TEST_W: tools_frouros.HoeffdingDriftDetectionMethodTestW,
+        methods.OnlineCD.REACTIVE_DRIFT_DETECTION_METHOD: tools_frouros.ReactiveDriftDetectionMethod,
+        methods.OnlineCD.ADAPTIVE_WINDOWING: tools_frouros.AdaptiveWindowing,
+        methods.OnlineCD.KOLMOGOROV_SMIRNOV_WINDOWING: tools_frouros.KolmogorovSmirnovWindowing,
+        methods.OnlineCD.STATISTICAL_TEST_EQUAL_PROPORTIONS_DETECTION: tools_frouros.StatisticalTestEqualProportionsDetection,
     }
     online_dd_methods: dict[methods.OnlineDD, Any] = {
-        methods.OnlineDD.MMD: tools_frouros.StreamMMD,
-        methods.OnlineDD.KSI: tools_frouros.KSI,
+        methods.OnlineDD.ONLINE_MAXIMUM_MEAN_DISCREPANCY: tools_frouros.OnlineMaximumMeanDiscrepancy,
+        methods.OnlineDD.INCREMENTAL_KOLMOGOROV_SMIRNOV_TEST: tools_frouros.IncrementalKolmogorovSmirnovTest,
     }
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {
-        methods.BatchDD.BHATTACHARYYA: tools_frouros.BHATTACHARYYA,
-        methods.BatchDD.EMD: tools_frouros.EMD,
-        methods.BatchDD.ENERGY: tools_frouros.ENERGY,
-        methods.BatchDD.HELLINGER: tools_frouros.HELLINGER,
-        methods.BatchDD.HI_NCOMP: tools_frouros.HI_NCOMP,
-        methods.BatchDD.JSD: tools_frouros.JSD,
-        methods.BatchDD.KLD: tools_frouros.KLD,
-        methods.BatchDD.MMD: tools_frouros.BatchMMD,
-        methods.BatchDD.PSI: tools_frouros.PSI,
-        methods.BatchDD.ANDERSON_DARLING: tools_frouros.ANDERSON_DARLING,
-        methods.BatchDD.BWS: tools_frouros.BWS,
-        methods.BatchDD.CHI_SQUARE: tools_frouros.CHI_SQUARE,
-        methods.BatchDD.CVM: tools_frouros.CVM,
-        methods.BatchDD.KS: tools_frouros.KS,
-        methods.BatchDD.KUIPER: tools_frouros.KUIPER,
-        methods.BatchDD.MANN_WHITNEY: tools_frouros.MANN_WHITNEY,
-        methods.BatchDD.WELCH_T: tools_frouros.WELCH_T,
+        methods.BatchDD.BHATTACHARYYA_DISTANCE: tools_frouros.BhattacharyyaDistance,
+        methods.BatchDD.EARTH_MOVER_DISTANCE: tools_frouros.EarthMoverDistance,
+        methods.BatchDD.ENERGY_DISTANCE: tools_frouros.EnergyDistance,
+        methods.BatchDD.HELLINGER_DISTANCE: tools_frouros.HellingerDistance,
+        methods.BatchDD.HISTOGRAM_INTERSECTION_NORMALIZED_COMPLEMENT: tools_frouros.HistogramIntersectionNormalizedComplement,
+        methods.BatchDD.JENSEN_SHANNON_DIVERGENCE_DRIFT_DETECTION: tools_frouros.JensenShannonDivergenceDriftDetection,
+        methods.BatchDD.KULLBACK_LEIBLER_DIVERGENCE_DRIFT_DETECTION: tools_frouros.KullbackLeiblerDivergenceDriftDetection,
+        methods.BatchDD.BATCH_MAXIMUM_MEAN_DISCREPANCY: tools_frouros.BatchMaximumMeanDiscrepancy,
+        methods.BatchDD.POPULATION_STABILITY_INDEX: tools_frouros.PopulationStabilityIndex,
+        methods.BatchDD.ANDERSON_DARLING_TEST: tools_frouros.AndersonDarlingTest,
+        methods.BatchDD.BAUMGARTNER_WEISS_SCHINDLER_TEST: tools_frouros.BaumgartnerWeissSchindlerTest,
+        methods.BatchDD.CHI_SQUARE_TEST: tools_frouros.ChiSquareTest,
+        methods.BatchDD.CRAMER_VON_MISES_TEST: tools_frouros.CramerVonMisesTest,
+        methods.BatchDD.KOLMOGOROV_SMIRNOV_TEST: tools_frouros.KolmogorovSmirnovTest,
+        methods.BatchDD.KUIPER_TEST: tools_frouros.KuiperTest,
+        methods.BatchDD.MANN_WHITNEY_U_TEST: tools_frouros.MannWhitneyUTest,
+        methods.BatchDD.WELCH_T_TEST: tools_frouros.WelchTTest,
     }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -131,7 +131,7 @@ class Evidently(Tool):
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {
-        methods.BatchDD.KS: tools_evidently.KSTest,
+        methods.BatchDD.KOLMOGOROV_SMIRNOV_TEST: tools_evidently.KSTest,
     }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -147,7 +147,7 @@ class NannyML(Tool):
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {
-        methods.BatchDD.KS: tools_nannyml.KSTest,
+        methods.BatchDD.KOLMOGOROV_SMIRNOV_TEST: tools_nannyml.KSTest,
     }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:

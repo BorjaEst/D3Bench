@@ -21,30 +21,29 @@ class OnlineCD(StrEnum):
     """
 
     # Change Detection
-    BOCD = "Bayesian Online Change Detection"
-    CUSUM = "Cumulative Sum Control Chart"
-    GMA = "Geometric Moving Average"
-    PCA_CD = "Principal Component Analysis for Concept Drift"
-    PHT = "Page-Hinkley Test"
+    BAYESIAN_ONLINE_CHANGE_DETECTION = "Bayesian Online Change Detection"
+    CUMULATIVE_SUM_CONTROL_CHART = "Cumulative Sum Control Chart"
+    GEOMETRIC_MOVING_AVERAGE = "Geometric Moving Average"
+    PRINCIPAL_COMPONENT_ANALYSIS_CONCEPT_DRIFT = "Principal Component Analysis for Concept Drift"
+    PAGE_HINKLEY_TEST = "Page-Hinkley Test"
 
     # Statistical Process Control
-    DDM = "Drift Detection Method"
-    ECDD = "Exponential Cumulative Drift Detection"
-    ECDD_H = "Ensemble-based Exponential Cumulative Drift Detection"
-    ECDDWT = "EWMA Concept Drift Detection Warning"
-    EDDM = "Early Drift Detection Method"
-    HDDM_A = "Hoeffding's Drift Detection Method Test-A"
-    HDDM_W = "Hoeffding's Drift Detection Method Test-W"
-    RDDM = "Reactive Drift Detection Method"
+    DRIFT_DETECTION_METHOD = "Drift Detection Method"
+    EXPONENTIAL_CUMULATIVE_DRIFT_DETECTION = "Exponential Cumulative Drift Detection"
+    EWMA_CONCEPT_DRIFT_DETECTION_WARNING = "EWMA Concept Drift Detection Warning"
+    EARLY_DRIFT_DETECTION_METHOD = "Early Drift Detection Method"
+    HOEFFDING_DRIFT_DETECTION_METHOD_TEST_A = "Hoeffding's Drift Detection Method Test-A"
+    HOEFFDING_DRIFT_DETECTION_METHOD_TEST_W = "Hoeffding's Drift Detection Method Test-W"
+    REACTIVE_DRIFT_DETECTION_METHOD = "Reactive Drift Detection Method"
 
     # Window Based
-    ADWIN = "Adaptive Windowing"
-    KSWIN = "Kolmogorov-Smirnov Windowing"
-    OAUE = "Online Accuracy Updated Ensemble"
-    STEPD = "Statistical Test of Equal Proportions Detection"
+    ADAPTIVE_WINDOWING = "Adaptive Windowing"
+    KOLMOGOROV_SMIRNOV_WINDOWING = "Kolmogorov-Smirnov Windowing"
+    ONLINE_ACCURACY_UPDATED_ENSEMBLE = "Online Accuracy Updated Ensemble"
+    STATISTICAL_TEST_EQUAL_PROPORTIONS_DETECTION = "Statistical Test of Equal Proportions Detection"
 
     # Other
-    CDDM = "Change Detection in Data Streams"
+    CHANGE_DETECTION_DATA_STREAMS = "Change Detection in Data Streams"
 
 
 # Online Unsupervised Data Drift Detection
@@ -59,13 +58,13 @@ class OnlineDD(StrEnum):
     """
 
     # Distance Based
-    DDMO = "Drift Detection Model Output"
-    MMD = "Maximum Mean Discrepancy"
-    UDD = "Unsupervised Drift Detector"
+    DRIFT_DETECTION_MODEL_OUTPUT = "Drift Detection Model Output"
+    ONLINE_MAXIMUM_MEAN_DISCREPANCY = "Online Maximum Mean Discrepancy"
+    UNSUPERVISED_DRIFT_DETECTOR = "Unsupervised Drift Detector"
 
     # Statistical Test
-    LFR = "Log-Likelihood Ratio Test"
-    KSI = "Incremental Kolmogorov-Smirnov Test"
+    LOG_LIKELIHOOD_RATIO_TEST = "Log-Likelihood Ratio Test"
+    INCREMENTAL_KOLMOGOROV_SMIRNOV_TEST = "Incremental Kolmogorov-Smirnov Test"
 
 
 # Batch Concept Drift Detection
@@ -90,26 +89,26 @@ class BatchDD(StrEnum):
     """
 
     # Distance Based
-    BHATTACHARYYA = "Bhattacharyya Distance"
-    EMD = "Earth Mover's Distance"
-    ENERGY = "Energy Distance"
-    HELLINGER = "Hellinger Distance"
-    HI_NCOMP = "Histogram Intersection Normalized Complement"
-    JSD = "Jensen-Shannon Divergence Drift Detection"
-    KLD = "Kullback-Leibler Divergence Drift Detection"
-    LSDD = "Least-Squares Density Difference"
-    MMD = "Maximum Mean Discrepancy"
-    PSI = "Population Stability Index"
+    BHATTACHARYYA_DISTANCE = "Bhattacharyya Distance"
+    EARTH_MOVER_DISTANCE = "Earth Mover's Distance"
+    ENERGY_DISTANCE = "Energy Distance"
+    HELLINGER_DISTANCE = "Hellinger Distance"
+    HISTOGRAM_INTERSECTION_NORMALIZED_COMPLEMENT = "Histogram Intersection Normalized Complement"
+    JENSEN_SHANNON_DIVERGENCE_DRIFT_DETECTION = "Jensen-Shannon Divergence Drift Detection"
+    KULLBACK_LEIBLER_DIVERGENCE_DRIFT_DETECTION = "Kullback-Leibler Divergence Drift Detection"
+    LEAST_SQUARES_DENSITY_DIFFERENCE = "Least-Squares Density Difference"
+    BATCH_MAXIMUM_MEAN_DISCREPANCY = "Batch Maximum Mean Discrepancy"
+    POPULATION_STABILITY_INDEX = "Population Stability Index"
 
     # Statistical Test
-    ANDERSON_DARLING = "Anderson-Darling Test"
-    BWS = "Baumgartner Weiss Schindler Test"
-    CHI_SQUARE = "Chi-square Test"
-    CVM = "Cramér-von Mises Test"
-    KS = "Kolmogorov-Smirnov Test"
-    KUIPER = "Kuiper's Test"
-    MANN_WHITNEY = "Mann-Whitney U-Test"
-    MDDM_A = "Mc Diarmid Drift Detection Method Test-A"
-    MDDM_E = "Mc Diarmid Drift Detection Method Test-E"
-    MDDM_G = "Mc Diarmid Drift Detection Method Test-G"
-    WELCH_T = "Welch's T-Test"
+    ANDERSON_DARLING_TEST = "Anderson-Darling Test"
+    BAUMGARTNER_WEISS_SCHINDLER_TEST = "Baumgartner Weiss Schindler Test"
+    CHI_SQUARE_TEST = "Chi-square Test"
+    CRAMER_VON_MISES_TEST = "Cramér-von Mises Test"
+    KOLMOGOROV_SMIRNOV_TEST = "Kolmogorov-Smirnov Test"
+    KUIPER_TEST = "Kuiper's Test"
+    MANN_WHITNEY_U_TEST = "Mann-Whitney U-Test"
+    MC_DIARMID_DRIFT_DETECTION_METHOD_TEST_A = "Mc Diarmid Drift Detection Method Test-A"
+    MC_DIARMID_DRIFT_DETECTION_METHOD_TEST_E = "Mc Diarmid Drift Detection Method Test-E"
+    MC_DIARMID_DRIFT_DETECTION_METHOD_TEST_G = "Mc Diarmid Drift Detection Method Test-G"
+    WELCH_T_TEST = "Welch's T-Test"

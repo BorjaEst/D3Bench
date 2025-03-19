@@ -52,7 +52,7 @@ class BaseOnlineCD(utils.BaseTestMethod, ABC):
         return {"drift": self.detector.status["drift"]}
 
 
-class BOCD(BaseOnlineCD):
+class BayesianOnlineChangeDetection(BaseOnlineCD):
     """Bayesian Online Change Detection."""
 
     detector_class = concept_drift.BOCD
@@ -63,7 +63,7 @@ class BOCD(BaseOnlineCD):
     )
 
 
-class CUSUM(BaseOnlineCD):
+class CumulativeSumControlChart(BaseOnlineCD):
     """Cumulative Sum Control Chart"""
 
     detector_class = concept_drift.CUSUM
@@ -74,7 +74,7 @@ class CUSUM(BaseOnlineCD):
     )
 
 
-class GMA(BaseOnlineCD):
+class GeometricMovingAverage(BaseOnlineCD):
     """Geometric Moving Average"""
 
     detector_class = concept_drift.GeometricMovingAverage
@@ -85,7 +85,7 @@ class GMA(BaseOnlineCD):
     )
 
 
-class PHT(BaseOnlineCD):
+class PageHinkleyTest(BaseOnlineCD):
     """Page-Hinkley Test"""
 
     detector_class = concept_drift.PageHinkley
@@ -97,7 +97,7 @@ class PHT(BaseOnlineCD):
     )
 
 
-class DDM(BaseOnlineCD):
+class DriftDetectionMethod(BaseOnlineCD):
     """Drift Detection Method"""
 
     detector_class = concept_drift.DDM
@@ -108,7 +108,7 @@ class DDM(BaseOnlineCD):
     )
 
 
-class ECDDWT(BaseOnlineCD):
+class EWMAConceptDriftDetectionWarning(BaseOnlineCD):
     """EWMA Concept Drift Detection Warning"""
 
     detector_class = concept_drift.ECDDWT
@@ -120,7 +120,7 @@ class ECDDWT(BaseOnlineCD):
     )
 
 
-class EDDM(BaseOnlineCD):
+class EarlyDriftDetectionMethod(BaseOnlineCD):
     """Early Drift Detection Method"""
 
     detector_class = concept_drift.EDDM
@@ -132,7 +132,7 @@ class EDDM(BaseOnlineCD):
     )
 
 
-class HDDM_A(BaseOnlineCD):
+class HoeffdingDriftDetectionMethodTestA(BaseOnlineCD):
     """Hoeffding's Drift Detection Method Test-A"""
 
     detector_class = concept_drift.HDDMA
@@ -144,7 +144,7 @@ class HDDM_A(BaseOnlineCD):
     )
 
 
-class HDDM_W(BaseOnlineCD):
+class HoeffdingDriftDetectionMethodTestW(BaseOnlineCD):
     """Hoeffding's Drift Detection Method Test-W"""
 
     detector_class = concept_drift.HDDMW
@@ -157,7 +157,7 @@ class HDDM_W(BaseOnlineCD):
     )
 
 
-class RDDM(BaseOnlineCD):
+class ReactiveDriftDetectionMethod(BaseOnlineCD):
     """Reactive Drift Detection Method"""
 
     detector_class = concept_drift.RDDM
@@ -170,7 +170,7 @@ class RDDM(BaseOnlineCD):
     )
 
 
-class ADWIN(BaseOnlineCD):
+class AdaptiveWindowing(BaseOnlineCD):
     """Adaptive Windowing"""
 
     detector_class = concept_drift.ADWIN
@@ -183,7 +183,7 @@ class ADWIN(BaseOnlineCD):
     )
 
 
-class KSWIN(BaseOnlineCD):
+class KolmogorovSmirnovWindowing(BaseOnlineCD):
     """Kolmogorov-Smirnov Windowing detector."""
 
     detector_class = concept_drift.KSWIN
@@ -195,7 +195,7 @@ class KSWIN(BaseOnlineCD):
     )
 
 
-class STEPD(BaseOnlineCD):
+class StatisticalTestEqualProportionsDetection(BaseOnlineCD):
     """Statistical Test of Equal Proportions"""
 
     detector_class = concept_drift.STEPD
@@ -209,7 +209,7 @@ class STEPD(BaseOnlineCD):
 # Online Data Drift Detection
 
 
-class StreamMMD(utils.BaseTestMethod):
+class OnlineMaximumMeanDiscrepancy(utils.BaseTestMethod):
     """Maximum Mean Discrepancy"""
 
     detector_class = data_drift.MMDStreaming
@@ -236,7 +236,7 @@ class StreamMMD(utils.BaseTestMethod):
         return {"distance": self.distance}
 
 
-class KSI(utils.BaseTestMethod):
+class IncrementalKolmogorovSmirnovTest(utils.BaseTestMethod):
     """Incremental Kolmogorov-Smirnov Test"""
 
     detector_class = data_drift.IncrementalKSTest
@@ -307,7 +307,7 @@ class BaseBatchDD(utils.BaseTestMethod, ABC):
         return {"results": self.results}
 
 
-class BHATTACHARYYA(BaseBatchDD):
+class BhattacharyyaDistance(BaseBatchDD):
     """Bhattacharyya Distance"""
 
     detector_class = data_drift.BhattacharyyaDistance
@@ -317,7 +317,7 @@ class BHATTACHARYYA(BaseBatchDD):
     }
 
 
-class EMD(BaseBatchDD):
+class EarthMoverDistance(BaseBatchDD):
     """Earth Mover's Distance"""
 
     detector_class = data_drift.EMD
@@ -326,7 +326,7 @@ class EMD(BaseBatchDD):
     }
 
 
-class ENERGY(BaseBatchDD):
+class EnergyDistance(BaseBatchDD):
     """Energy Distance"""
 
     detector_class = data_drift.EnergyDistance
@@ -335,7 +335,7 @@ class ENERGY(BaseBatchDD):
     }
 
 
-class HELLINGER(BaseBatchDD):
+class HellingerDistance(BaseBatchDD):
     """Hellinger Distance"""
 
     detector_class = data_drift.HellingerDistance
@@ -345,7 +345,7 @@ class HELLINGER(BaseBatchDD):
     }
 
 
-class HI_NCOMP(BaseBatchDD):
+class HistogramIntersectionNormalizedComplement(BaseBatchDD):
     """Histogram Intersection Normalized Complement"""
 
     detector_class = data_drift.HINormalizedComplement
@@ -355,7 +355,7 @@ class HI_NCOMP(BaseBatchDD):
     }
 
 
-class JSD(BaseBatchDD):
+class JensenShannonDivergenceDriftDetection(BaseBatchDD):
     """Jensen-Shannon Divergence Drift Detection"""
 
     detector_class = data_drift.JS
@@ -365,7 +365,7 @@ class JSD(BaseBatchDD):
     }
 
 
-class KLD(BaseBatchDD):
+class KullbackLeiblerDivergenceDriftDetection(BaseBatchDD):
     """Kullback-Leibler Divergence Drift Detection"""
 
     detector_class = data_drift.KL
@@ -375,7 +375,7 @@ class KLD(BaseBatchDD):
     }
 
 
-class BatchMMD(BaseBatchDD):
+class BatchMaximumMeanDiscrepancy(BaseBatchDD):
     """Maximum Mean Discrepancy"""
 
     detector_class = data_drift.MMD
@@ -386,7 +386,7 @@ class BatchMMD(BaseBatchDD):
     }
 
 
-class PSI(BaseBatchDD):
+class PopulationStabilityIndex(BaseBatchDD):
     """Population Stability Index"""
 
     detector_class = data_drift.PSI
@@ -396,7 +396,7 @@ class PSI(BaseBatchDD):
     }
 
 
-class ANDERSON_DARLING(BaseBatchDD):
+class AndersonDarlingTest(BaseBatchDD):
     """Anderson-Darling Test"""
 
     detector_class = data_drift.AndersonDarlingTest
@@ -405,7 +405,7 @@ class ANDERSON_DARLING(BaseBatchDD):
     }
 
 
-class BWS(BaseBatchDD):
+class BaumgartnerWeissSchindlerTest(BaseBatchDD):
     """Baumgartner Weiss Schindler Test"""
 
     detector_class = data_drift.BWSTest
@@ -414,7 +414,7 @@ class BWS(BaseBatchDD):
     }
 
 
-class CHI_SQUARE(BaseBatchDD):
+class ChiSquareTest(BaseBatchDD):
     """Chi-square Test"""
 
     detector_class = data_drift.ChiSquareTest
@@ -423,7 +423,7 @@ class CHI_SQUARE(BaseBatchDD):
     }
 
 
-class CVM(BaseBatchDD):
+class CramerVonMisesTest(BaseBatchDD):
     """Cramér-von Mises Test"""
 
     detector_class = data_drift.CVMTest
@@ -432,7 +432,7 @@ class CVM(BaseBatchDD):
     }
 
 
-class KS(BaseBatchDD):
+class KolmogorovSmirnovTest(BaseBatchDD):
     """Kolmogorov-Smirnov Test"""
 
     detector_class = data_drift.KSTest
@@ -441,7 +441,7 @@ class KS(BaseBatchDD):
     }
 
 
-class KUIPER(BaseBatchDD):
+class KuiperTest(BaseBatchDD):
     """Kuiper's Test"""
 
     detector_class = data_drift.KuiperTest
@@ -450,7 +450,7 @@ class KUIPER(BaseBatchDD):
     }
 
 
-class MANN_WHITNEY(BaseBatchDD):
+class MannWhitneyUTest(BaseBatchDD):
     """Mann-Whitney U-Test"""
 
     detector_class = data_drift.MannWhitneyUTest
@@ -459,7 +459,7 @@ class MANN_WHITNEY(BaseBatchDD):
     }
 
 
-class WELCH_T(BaseBatchDD):
+class WelchTTest(BaseBatchDD):
     """Welch's T-Test"""
 
     detector_class = data_drift.WelchTTest
