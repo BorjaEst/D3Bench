@@ -20,9 +20,9 @@ class BaseOnlineCD(utils.BaseTestMethod, ABC):
     """Base class for online concept drift detectors."""
 
     def __init__(self, features: list[str]) -> None:
-        self.detectors = [self.detector_class(self.config) for _ in features]
+        self.detector = self.detector_class(self.config)
         self.features = features
-        self.drift: list[bool] = []
+        self.drift: bool
 
     @property
     @abstractmethod
@@ -38,20 +38,18 @@ class BaseOnlineCD(utils.BaseTestMethod, ABC):
         # Detector is trained one by one on the reference data
         # See:
         # https://frouros.readthedocs.io/en/latest/examples/concept_drift/DDM_advance.html#warm-up-phase
-        for i, _ in enumerate(self.features):
-            # !!! only 1000 instances are used for training, very high time consumption
-            for x in x_reference[i][:1000]:
-                self.detectors[i].update(value=x)
+        # !!! only 1000 instances are used for training, very high time consumption
+        for x in np.linalg.norm(x_reference[:1000], ord=2, axis=1):
+            self.detector.update(value=x)
 
     def test(self, x_test: np.ndarray) -> None:
         # Only one feature is accepted
-        for i, _ in enumerate(self.features):
-            # !!! only 100 instances are used for testing, very high time consumption
-            for x in x_test[:100, i]:
-                self.detectors[i].update(value=x)
+        # !!! only 100 instances are used for testing, very high time consumption
+        for x in np.linalg.norm(x_test[:100], ord=2, axis=1):
+            self.detector.update(value=x)
 
     def result(self) -> dict[str, Any]:
-        return {"drifts": [d.status["drift"] for d in self.detectors]}
+        return {"drift": self.detector.status["drift"]}
 
 
 class BOCD(BaseOnlineCD):
@@ -211,7 +209,7 @@ class STEPD(BaseOnlineCD):
 # Online Data Drift Detection
 
 
-class MMD(utils.BaseTestMethod):
+class StreamMMD(utils.BaseTestMethod):
     """Maximum Mean Discrepancy"""
 
     detector_class = data_drift.MMDStreaming
@@ -313,14 +311,158 @@ class BHATTACHARYYA(BaseBatchDD):
     """Bhattacharyya Distance"""
 
     detector_class = data_drift.BhattacharyyaDistance
-    config = {"callbacks": None}
+    config = {
+        "num_bins": 10,  # number of bins in which to divide probabilities
+        "callbacks": None,
+    }
 
 
-class KSTest(BaseBatchDD):
+class EMD(BaseBatchDD):
+    """Earth Mover's Distance"""
+
+    detector_class = data_drift.EMD
+    config = {
+        "callbacks": None,
+    }
+
+
+class ENERGY(BaseBatchDD):
+    """Energy Distance"""
+
+    detector_class = data_drift.EnergyDistance
+    config = {
+        "callbacks": None,
+    }
+
+
+class HELLINGER(BaseBatchDD):
+    """Hellinger Distance"""
+
+    detector_class = data_drift.HellingerDistance
+    config = {
+        "num_bins": 10,  # number of bins in which to divide probabilities
+        "callbacks": None,
+    }
+
+
+class HI_NCOMP(BaseBatchDD):
+    """Histogram Intersection Normalized Complement"""
+
+    detector_class = data_drift.HINormalizedComplement
+    config = {
+        "num_bins": 10,  # number of bins in which to divide probabilities
+        "callbacks": None,
+    }
+
+
+class JSD(BaseBatchDD):
+    """Jensen-Shannon Divergence Drift Detection"""
+
+    detector_class = data_drift.JS
+    config = {
+        "num_bins": 10,  # number of bins in which to divide probabilities
+        "callbacks": None,
+    }
+
+
+class KLD(BaseBatchDD):
+    """Kullback-Leibler Divergence Drift Detection"""
+
+    detector_class = data_drift.KL
+    config = {
+        "num_bins": 10,  # number of bins in which to divide probabilities
+        "callbacks": None,
+    }
+
+
+class BatchMMD(BaseBatchDD):
+    """Maximum Mean Discrepancy"""
+
+    detector_class = data_drift.MMD
+    config = {
+        "kernel": rbf_kernel,  # Kernel function
+        "chunk_size": 1000,  # Chunk size value
+        "callbacks": None,
+    }
+
+
+class PSI(BaseBatchDD):
+    """Population Stability Index"""
+
+    detector_class = data_drift.PSI
+    config = {
+        "num_bins": 10,  # number of bins in which to divide probabilities
+        "callbacks": None,
+    }
+
+
+class ANDERSON_DARLING(BaseBatchDD):
+    """Anderson-Darling Test"""
+
+    detector_class = data_drift.AndersonDarlingTest
+    config = {
+        "callbacks": None,
+    }
+
+
+class BWS(BaseBatchDD):
+    """Baumgartner Weiss Schindler Test"""
+
+    detector_class = data_drift.BWSTest
+    config = {
+        "callbacks": None,
+    }
+
+
+class CHI_SQUARE(BaseBatchDD):
+    """Chi-square Test"""
+
+    detector_class = data_drift.ChiSquareTest
+    config = {
+        "callbacks": None,
+    }
+
+
+class CVM(BaseBatchDD):
+    """Cramér-von Mises Test"""
+
+    detector_class = data_drift.CVMTest
+    config = {
+        "callbacks": None,
+    }
+
+
+class KS(BaseBatchDD):
     """Kolmogorov-Smirnov Test"""
 
     detector_class = data_drift.KSTest
     config = {
-        "num_bins": 10,  # number of bins in which to divide probabilities
+        "callbacks": None,
+    }
+
+
+class KUIPER(BaseBatchDD):
+    """Kuiper's Test"""
+
+    detector_class = data_drift.KuiperTest
+    config = {
+        "callbacks": None,
+    }
+
+
+class MANN_WHITNEY(BaseBatchDD):
+    """Mann-Whitney U-Test"""
+
+    detector_class = data_drift.MannWhitneyUTest
+    config = {
+        "callbacks": None,
+    }
+
+
+class WELCH_T(BaseBatchDD):
+    """Welch's T-Test"""
+
+    detector_class = data_drift.WelchTTest
+    config = {
         "callbacks": None,
     }

@@ -93,12 +93,28 @@ class Frouros(Tool):
         methods.OnlineCD.STEPD: tools_frouros.STEPD,
     }
     online_dd_methods: dict[methods.OnlineDD, Any] = {
-        methods.OnlineDD.MMD: tools_frouros.MMD,
+        methods.OnlineDD.MMD: tools_frouros.StreamMMD,
         methods.OnlineDD.KSI: tools_frouros.KSI,
     }
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {
-        methods.BatchDD.KS: tools_frouros.KSTest,
+        methods.BatchDD.BHATTACHARYYA: tools_frouros.BHATTACHARYYA,
+        methods.BatchDD.EMD: tools_frouros.EMD,
+        methods.BatchDD.ENERGY: tools_frouros.ENERGY,
+        methods.BatchDD.HELLINGER: tools_frouros.HELLINGER,
+        methods.BatchDD.HI_NCOMP: tools_frouros.HI_NCOMP,
+        methods.BatchDD.JSD: tools_frouros.JSD,
+        methods.BatchDD.KLD: tools_frouros.KLD,
+        methods.BatchDD.MMD: tools_frouros.BatchMMD,
+        methods.BatchDD.PSI: tools_frouros.PSI,
+        methods.BatchDD.ANDERSON_DARLING: tools_frouros.ANDERSON_DARLING,
+        methods.BatchDD.BWS: tools_frouros.BWS,
+        methods.BatchDD.CHI_SQUARE: tools_frouros.CHI_SQUARE,
+        methods.BatchDD.CVM: tools_frouros.CVM,
+        methods.BatchDD.KS: tools_frouros.KS,
+        methods.BatchDD.KUIPER: tools_frouros.KUIPER,
+        methods.BatchDD.MANN_WHITNEY: tools_frouros.MANN_WHITNEY,
+        methods.BatchDD.WELCH_T: tools_frouros.WELCH_T,
     }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
