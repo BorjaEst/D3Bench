@@ -68,7 +68,8 @@ def main(args: Arguments) -> None:
     # Set the logging level from the arguments
     logging.basicConfig(
         handlers=[RichHandler(rich_tracebacks=True)],
-        level=args.log_level,
+        level=args.log_level.upper(),
+        force=True,
     )
     logger.debug("Call arguments: %s", args)
 
