@@ -5,8 +5,10 @@ from typing import Any
 from abc import ABC, abstractmethod
 import pandas as pd
 from frouros.detectors import concept_drift, data_drift
+import numpy as np
 
 from d3bench import utils
+from frouros.utils.kernels import rbf_kernel
 
 # TODO: Might be interesting to move all configurations to a toml file
 
@@ -18,9 +20,9 @@ class BaseOnlineCD(utils.BaseTestMethod, ABC):
     """Base class for online concept drift detectors."""
 
     def __init__(self, features: list[str]) -> None:
-        self.detector = self.detector_class(self.config)
+        self.detectors = [self.detector_class(self.config) for _ in features]
         self.features = features
-        self.drift: bool
+        self.drift: list[bool] = []
 
     @property
     @abstractmethod
@@ -32,21 +34,24 @@ class BaseOnlineCD(utils.BaseTestMethod, ABC):
     def detector_class(self) -> Any:
         """Property that returns the detector class."""
 
-    def fit(self, x_reference: pd.DataFrame) -> None:
+    def fit(self, x_reference: np.ndarray) -> None:
         # Detector is trained one by one on the reference data
         # See:
         # https://frouros.readthedocs.io/en/latest/examples/concept_drift/DDM_advance.html#warm-up-phase
-        x1, _ = x_reference  # Only one feature is accepted
-        # Warning, only 1000 instances are used for training, very high time consumption
-        for x in x1[:1000]:  # Only the first 1000 instances are used for training
-            self.detector.update(value=x)
+        for i, _ in enumerate(self.features):
+            # !!! only 1000 instances are used for training, very high time consumption
+            for x in x_reference[i][:1000]:
+                self.detectors[i].update(value=x)
 
-    def test(self, x_test: pd.DataFrame) -> None:
-        x1, _ = x_test  # Only one feature is accepted
-        self.detector.update(value=x1[0])
+    def test(self, x_test: np.ndarray) -> None:
+        # Only one feature is accepted
+        for i, _ in enumerate(self.features):
+            # !!! only 100 instances are used for testing, very high time consumption
+            for x in x_test[:100, i]:
+                self.detectors[i].update(value=x)
 
     def result(self) -> dict[str, Any]:
-        return {"drift": self.detector.status["drift"]}
+        return {"drifts": [d.status["drift"] for d in self.detectors]}
 
 
 class BOCD(BaseOnlineCD):
@@ -205,49 +210,117 @@ class STEPD(BaseOnlineCD):
 
 # Online Data Drift Detection
 
+
+class MMD(utils.BaseTestMethod):
+    """Maximum Mean Discrepancy"""
+
+    detector_class = data_drift.MMDStreaming
+    config = {
+        "window_size": 10,  # Window size value
+        "kernel": rbf_kernel,  # Kernel function
+        "chunk_size": 1000,  # Chunk size value
+        "callbacks": None,  # Callbacks
+    }
+
+    def __init__(self, features: list[str]) -> None:
+        self.detector = self.detector_class(**self.config)
+        self.features = features
+        self.distance = None
+
+    def fit(self, x_reference: np.ndarray) -> None:
+        self.detector.fit(X=x_reference)
+
+    def test(self, x_test: np.ndarray) -> None:
+        # Take only the first 10 instances for testing as window size is 10
+        self.distance = [self.detector.update(value=x)[0] for x in x_test[:10]][-1]
+
+    def result(self) -> dict[str, Any]:
+        return {"distance": self.distance}
+
+
+class KSI(utils.BaseTestMethod):
+    """Incremental Kolmogorov-Smirnov Test"""
+
+    detector_class = data_drift.IncrementalKSTest
+    config = {
+        "window_size": 10,  # Window size value
+        "callbacks": None,  # Callbacks
+    }
+
+    def __init__(self, features: list[str]) -> None:
+        self.detectors = [self.detector_class(**self.config) for _ in features]
+        self.features = features
+        self.results: list[Any] = [None for _ in features]
+
+    def fit(self, x_reference: np.ndarray) -> None:
+        # Only one feature is accepted
+        for i, _ in enumerate(self.features):
+            # 1000 values otherwise "IndexError": invalid index to scalar variable.
+            self.detectors[i].fit(X=x_reference[:1000, i])
+
+    def test(self, x_test: np.ndarray) -> None:
+        # Only one feature is accepted
+        for i, _ in enumerate(self.features):
+            res = [self.detectors[i].update(value=x)[0] for x in x_test[:10, i]][-1]
+            self.results[i] = res
+
+    def result(self) -> dict[str, Any]:
+        return {
+            "distances": [self.results[i].statistic for i, _ in enumerate(self.features)],
+            "p_values": [self.results[i].p_value for i, _ in enumerate(self.features)],
+        }
+
+
 # Batch Concept Drift Detection
 
 
 # Batch Data Drift Detection
 
 
-class KSTest(utils.BaseTestMethod):
+class BaseBatchDD(utils.BaseTestMethod, ABC):
+    """Base class for batch data drift detectors."""
+
+    def __init__(self, features: list[str]) -> None:
+        self.detectors = [self.detector_class(**self.config) for _ in features]
+        self.features = features
+        self.results: list[Any] = []
+
+    @property
+    @abstractmethod
+    def config(self) -> Any:
+        """Property that returns the detector configuration."""
+
+    @property
+    @abstractmethod
+    def detector_class(self) -> Any:
+        """Property that returns the detector class."""
+
+    def fit(self, x_reference: np.ndarray) -> None:
+        for i, _ in enumerate(self.features):
+            self.detectors[i].fit(X=x_reference[i])
+
+    def test(self, x_test: np.ndarray) -> None:
+        self.results = [
+            self.detectors[i].compare(X=x_test[i])
+            for i, _ in enumerate(self.features)
+        ] # fmt: skip
+
+    def result(self) -> dict[str, Any]:
+        return {"results": self.results}
+
+
+class BHATTACHARYYA(BaseBatchDD):
+    """Bhattacharyya Distance"""
+
+    detector_class = data_drift.BhattacharyyaDistance
+    config = {"callbacks": None}
+
+
+class KSTest(BaseBatchDD):
     """Kolmogorov-Smirnov Test"""
 
-    def __init__(self, features: list[str]) -> None:
-        self.detectors = {k: data_drift.KSTest() for k in features}
-        self.features = features
-        self._results: dict[str, Any] = {}
-
-    def fit(self, x_reference: pd.DataFrame) -> None:
-        for i, feature in enumerate(self.features):
-            self.detectors[feature].fit(X=x_reference[i])
-
-    def test(self, x_test: pd.DataFrame) -> None:
-        self._results = {
-            feature: self.detectors[feature].compare(X=x_test[i])[0] for i, feature in enumerate(self.features)
-        }
-
-    def result(self) -> dict[str, Any]:
-        return self.detectors.to_dict()
-
-
-class CVMTest(utils.BaseTestMethod):
-    """Cramer-von Mises test for data drift detection."""
-
-    def __init__(self, features: list[str]) -> None:
-        self.detectors = {k: data_drift.CVMTest() for k in features}
-        self._results: dict[str, Any] = {}
-
-    def fit(self, x_reference: pd.DataFrame) -> None:
-        for feature in x_reference.columns:
-            self.detectors[feature].fit(X=x_reference[feature])
-
-    def test(self, x_test: pd.DataFrame) -> None:
-        self._results = {
-            k: self.detectors[k].compare(X=x_test[k])[0]
-            for k in x_test.columns  # fmt: skip
-        }
-
-    def result(self) -> dict[str, Any]:
-        return self.detectors.to_dict()
+    detector_class = data_drift.KSTest
+    config = {
+        "num_bins": 10,  # number of bins in which to divide probabilities
+        "callbacks": None,
+    }

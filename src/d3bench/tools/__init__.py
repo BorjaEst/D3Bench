@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from functools import cached_property
 from typing import Any, Generator, Optional
 
+import numpy as np
 import pandas as pd
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -91,7 +92,10 @@ class Frouros(Tool):
         methods.OnlineCD.KSWIN: tools_frouros.KSWIN,
         methods.OnlineCD.STEPD: tools_frouros.STEPD,
     }
-    online_dd_methods: dict[methods.OnlineDD, Any] = {}
+    online_dd_methods: dict[methods.OnlineDD, Any] = {
+        methods.OnlineDD.MMD: tools_frouros.MMD,
+        methods.OnlineDD.KSI: tools_frouros.KSI,
+    }
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {
         methods.BatchDD.KS: tools_frouros.KSTest,
@@ -99,7 +103,8 @@ class Frouros(Tool):
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df.drop(columns={"time"}, inplace=True)
-        return [df[feature].to_numpy() for feature in df.columns]
+        data = [df[feature].to_numpy() for feature in df.columns]
+        return np.stack(data).T
 
 
 class Evidently(Tool):
