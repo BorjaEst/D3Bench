@@ -147,7 +147,12 @@ class NannyML(Tool):
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {
-        methods.BatchDD.KOLMOGOROV_SMIRNOV_TEST: tools_nannyml.KSTest,
+        methods.BatchDD.JENSEN_SHANNON_DIVERGENCE_DRIFT_DETECTION: tools_nannyml.JensenShannonDivergenceDriftDetection,
+        methods.BatchDD.WASSERSTEIN_DISTANCE: tools_nannyml.WassersteinDistance,
+        methods.BatchDD.HELLINGER_DISTANCE: tools_nannyml.HellingerDistance,
+        methods.BatchDD.KOLMOGOROV_SMIRNOV_TEST: tools_nannyml.KolmogorovSmirnovTest,
+        methods.BatchDD.CHI_SQUARE_TEST: tools_nannyml.ChiSquareTest,
+        methods.BatchDD.L_INFINITY_DISTANCE: tools_nannyml.LInfinityDistance,
     }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:

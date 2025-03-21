@@ -88,10 +88,15 @@ class BatchDD(StrEnum):
         model retraining.
     """
 
+    # TODO: NannyML classifies Data Drift into Univariate Continuous and Categorical
+    # TODO: Maybe a new subclass for Univariate Continuous and Categorical?
+    # See nannyml.py, repeated method names with different implementations
+
     # Distance Based
     BHATTACHARYYA_DISTANCE = "Bhattacharyya Distance"
     EARTH_MOVER_DISTANCE = "Earth Mover's Distance"
     ENERGY_DISTANCE = "Energy Distance"
+    WASSERSTEIN_DISTANCE = "Wasserstein Distance"
     HELLINGER_DISTANCE = "Hellinger Distance"
     HISTOGRAM_INTERSECTION_NORMALIZED_COMPLEMENT = "Histogram Intersection Normalized Complement"
     JENSEN_SHANNON_DIVERGENCE_DRIFT_DETECTION = "Jensen-Shannon Divergence Drift Detection"
@@ -99,6 +104,7 @@ class BatchDD(StrEnum):
     LEAST_SQUARES_DENSITY_DIFFERENCE = "Least-Squares Density Difference"
     BATCH_MAXIMUM_MEAN_DISCREPANCY = "Batch Maximum Mean Discrepancy"
     POPULATION_STABILITY_INDEX = "Population Stability Index"
+    L_INFINITY_DISTANCE = "L-Infinity Distance"
 
     # Statistical Test
     ANDERSON_DARLING_TEST = "Anderson-Darling Test"
