@@ -105,6 +105,7 @@ class BatchDD(StrEnum):
     BATCH_MAXIMUM_MEAN_DISCREPANCY = "Batch Maximum Mean Discrepancy"
     POPULATION_STABILITY_INDEX = "Population Stability Index"
     L_INFINITY_DISTANCE = "L-Infinity Distance"
+    TOTAL_VARIATION_DISTANCE = "Total Variation Distance"
 
     # Statistical Test
     ANDERSON_DARLING_TEST = "Anderson-Darling Test"
@@ -118,3 +119,11 @@ class BatchDD(StrEnum):
     MC_DIARMID_DRIFT_DETECTION_METHOD_TEST_E = "Mc Diarmid Drift Detection Method Test-E"
     MC_DIARMID_DRIFT_DETECTION_METHOD_TEST_G = "Mc Diarmid Drift Detection Method Test-G"
     WELCH_T_TEST = "Welch's T-Test"
+
+    # TODO: Unclassified
+    FISHER_EXACT_TEST = "Fisher Exact Test"
+    EPPS_SINGLETON_TEST = "EPPS-Singleton Test"
+    EMPIRICAL_MAXIMUM_MEAN_DISCREPANCY = "Empirical Maximum Mean Discrepancy"
+    G_TEST = "G-Test"
+    T_TEST = "T-Test"
+    Z_TEST = "Z-Test"

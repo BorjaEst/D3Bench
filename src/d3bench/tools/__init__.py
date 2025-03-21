@@ -7,6 +7,8 @@ from typing import Any, Generator, Optional
 
 import numpy as np
 import pandas as pd
+from evidently.future.datasets import DataDefinition as EDataDefinition
+from evidently.future.datasets import Dataset as EDataset
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -131,12 +133,31 @@ class Evidently(Tool):
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {
-        methods.BatchDD.KOLMOGOROV_SMIRNOV_TEST: tools_evidently.KSTest,
+        # TODO: Commented only categorical methods, to test them, data needs to have categorical columns
+        methods.BatchDD.KOLMOGOROV_SMIRNOV_TEST: tools_evidently.KolmogorovSmirnovTest,
+        # methods.BatchDD.CHI_SQUARE_TEST: tools_evidently.ChiSquareTest,
+        # methods.BatchDD.Z_TEST: tools_evidently.ZTest,
+        methods.BatchDD.WASSERSTEIN_DISTANCE: tools_evidently.WassersteinDistance,
+        methods.BatchDD.KULLBACK_LEIBLER_DIVERGENCE_DRIFT_DETECTION: tools_evidently.KullbackLeiblerDivergenceDriftDetection,
+        methods.BatchDD.POPULATION_STABILITY_INDEX: tools_evidently.PopulationStabilityIndex,
+        methods.BatchDD.JENSEN_SHANNON_DIVERGENCE_DRIFT_DETECTION: tools_evidently.JensenShannonDivergenceDriftDetection,
+        methods.BatchDD.ANDERSON_DARLING_TEST: tools_evidently.AndersonDarlingTest,
+        # methods.BatchDD.FISHER_EXACT_TEST: tools_evidently.FisherExactTest,
+        methods.BatchDD.CRAMER_VON_MISES_TEST: tools_evidently.CramerVonMisesTest,
+        # methods.BatchDD.G_TEST: tools_evidently.GTest,
+        methods.BatchDD.HELLINGER_DISTANCE: tools_evidently.HellingerDistance,
+        methods.BatchDD.MANN_WHITNEY_U_TEST: tools_evidently.MannWhitneyUTest,
+        methods.BatchDD.ENERGY_DISTANCE: tools_evidently.EnergyDistance,
+        methods.BatchDD.EPPS_SINGLETON_TEST: tools_evidently.EppsSingletonTest,
+        methods.BatchDD.T_TEST: tools_evidently.TTest,
+        # methods.BatchDD.EMPIRICAL_MAXIMUM_MEAN_DISCREPANCY: tools_evidently.EmpiricalMaximumMeanDiscrepancy,
+        # methods.BatchDD.TOTAL_VARIATION_DISTANCE: tools_evidently.TotalVariationDistance,
     }
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df.drop(columns={"time"}, inplace=True)
-        return df
+        schema = EDataDefinition(numerical_columns=list(df.columns))
+        return EDataset.from_pandas(df, data_definition=schema)
 
 
 class NannyML(Tool):
