@@ -44,8 +44,7 @@ class BaseOnlineCD(utils.BaseTestMethod, ABC):
 
     def test(self, x_test: np.ndarray) -> None:
         # Only one feature is accepted
-        # !!! only 100 instances are used for testing, very high time consumption
-        for x in np.linalg.norm(x_test[:100], ord=2, axis=1):
+        for x in np.linalg.norm(x_test, ord=2, axis=1):
             self.detector.update(value=x)
 
     def result(self) -> dict[str, Any]:
