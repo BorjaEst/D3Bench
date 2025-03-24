@@ -1,0 +1,166 @@
+[
+    [
+        {
+            "method": "Jensen-Shannon Divergence Drift Detection",
+            "method_class": "<class 'd3bench.tools.nannyml.JensenShannonDivergenceDriftDetection'>",
+            "test_information": {
+                "framework": "NannyML",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T10:36:05.191042",
+            "runtime": {
+                "avg": 0.011939128239949545,
+                "max": 0.01211094856262207,
+                "min": 0.011797904968261719
+            },
+            "cputime": {
+                "avg": 0.011866033333333506,
+                "max": 0.012048400000000292,
+                "min": 0.011710500000000401
+            },
+            "memory": {
+                "avg": 456.1315104166667,
+                "max": 456.13671875,
+                "min": 456.12109375
+            }
+        },
+        {
+            "method": "Wasserstein Distance",
+            "method_class": "<class 'd3bench.tools.nannyml.WassersteinDistance'>",
+            "test_information": {
+                "framework": "NannyML",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T10:36:05.620570",
+            "runtime": {
+                "avg": 0.020279486974080402,
+                "max": 0.020973682403564453,
+                "min": 0.01960587501525879
+            },
+            "cputime": {
+                "avg": 0.01862799999999994,
+                "max": 0.01895150000000001,
+                "min": 0.018350700000000053
+            },
+            "memory": {
+                "avg": 456.3359375,
+                "max": 456.3359375,
+                "min": 456.3359375
+            }
+        },
+        {
+            "method": "Hellinger Distance",
+            "method_class": "<class 'd3bench.tools.nannyml.HellingerDistance'>",
+            "test_information": {
+                "framework": "NannyML",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T10:36:05.963855",
+            "runtime": {
+                "avg": 0.012353181838989258,
+                "max": 0.012487173080444336,
+                "min": 0.012237071990966797
+            },
+            "cputime": {
+                "avg": 0.012571899999999895,
+                "max": 0.012891299999999717,
+                "min": 0.012391199999999714
+            },
+            "memory": {
+                "avg": 456.671875,
+                "max": 456.671875,
+                "min": 456.671875
+            }
+        },
+        {
+            "method": "Kolmogorov-Smirnov Test",
+            "method_class": "<class 'd3bench.tools.nannyml.KolmogorovSmirnovTest'>",
+            "test_information": {
+                "framework": "NannyML",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T10:36:06.375151",
+            "runtime": {
+                "avg": 0.01731983820597331,
+                "max": 0.01744365692138672,
+                "min": 0.017245769500732422
+            },
+            "cputime": {
+                "avg": 0.017275166666666546,
+                "max": 0.017515500000000017,
+                "min": 0.01708469999999984
+            },
+            "memory": {
+                "avg": 456.703125,
+                "max": 456.703125,
+                "min": 456.703125
+            }
+        },
+        {
+            "method": "Chi-square Test",
+            "method_class": "<class 'd3bench.tools.nannyml.ChiSquareTest'>",
+            "test_information": {
+                "framework": "NannyML",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T10:36:06.711650",
+            "runtime": {
+                "avg": 0.012309948603312174,
+                "max": 0.012462854385375977,
+                "min": 0.012147188186645508
+            },
+            "cputime": {
+                "avg": 0.012269866666666593,
+                "max": 0.012325599999998715,
+                "min": 0.012202600000000174
+            },
+            "memory": {
+                "avg": 456.703125,
+                "max": 456.703125,
+                "min": 456.703125
+            }
+        },
+        {
+            "method": "L-Infinity Distance",
+            "method_class": "<class 'd3bench.tools.nannyml.LInfinityDistance'>",
+            "test_information": {
+                "framework": "NannyML",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T10:36:07.111533",
+            "runtime": {
+                "avg": 0.015314658482869467,
+                "max": 0.01719808578491211,
+                "min": 0.014189958572387695
+            },
+            "cputime": {
+                "avg": 0.013273433333333529,
+                "max": 0.014197499999999863,
+                "min": 0.012776900000000424
+            },
+            "memory": {
+                "avg": 456.76171875,
+                "max": 456.76171875,
+                "min": 456.76171875
+            }
+        }
+    ]
+]

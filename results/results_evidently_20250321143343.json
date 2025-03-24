@@ -1,0 +1,328 @@
+[
+    [
+        {
+            "method": "Kolmogorov-Smirnov Test",
+            "method_class": "<class 'd3bench.tools.evidently.KolmogorovSmirnovTest'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:44.653207",
+            "runtime": {
+                "avg": 0.12127439181009929,
+                "max": 0.15169358253479004,
+                "min": 0.09913921356201172
+            },
+            "cputime": {
+                "avg": 0.09546896666666675,
+                "max": 0.09665320000000044,
+                "min": 0.09475820000000024
+            },
+            "memory": {
+                "avg": 513.1705729166666,
+                "max": 513.171875,
+                "min": 513.16796875
+            }
+        },
+        {
+            "method": "Wasserstein Distance",
+            "method_class": "<class 'd3bench.tools.evidently.WassersteinDistance'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:46.244210",
+            "runtime": {
+                "avg": 0.1231834888458252,
+                "max": 0.13262939453125,
+                "min": 0.11533021926879883
+            },
+            "cputime": {
+                "avg": 0.11337623333333309,
+                "max": 0.12083900000000014,
+                "min": 0.10860070000000022
+            },
+            "memory": {
+                "avg": 513.734375,
+                "max": 513.734375,
+                "min": 513.734375
+            }
+        },
+        {
+            "method": "Kullback-Leibler Divergence Drift Detection",
+            "method_class": "<class 'd3bench.tools.evidently.KullbackLeiblerDivergenceDriftDetection'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:47.509920",
+            "runtime": {
+                "avg": 0.09236613909403484,
+                "max": 0.09413456916809082,
+                "min": 0.09035849571228027
+            },
+            "cputime": {
+                "avg": 0.09160933333333254,
+                "max": 0.09580120000000036,
+                "min": 0.08795619999999893
+            },
+            "memory": {
+                "avg": 514.36328125,
+                "max": 514.36328125,
+                "min": 514.36328125
+            }
+        },
+        {
+            "method": "Population Stability Index",
+            "method_class": "<class 'd3bench.tools.evidently.PopulationStabilityIndex'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:48.723458",
+            "runtime": {
+                "avg": 0.0851288636525472,
+                "max": 0.08588433265686035,
+                "min": 0.08429670333862305
+            },
+            "cputime": {
+                "avg": 0.08536053333333331,
+                "max": 0.08647269999999985,
+                "min": 0.08377770000000062
+            },
+            "memory": {
+                "avg": 514.8958333333334,
+                "max": 514.8984375,
+                "min": 514.89453125
+            }
+        },
+        {
+            "method": "Jensen-Shannon Divergence Drift Detection",
+            "method_class": "<class 'd3bench.tools.evidently.JensenShannonDivergenceDriftDetection'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:49.925142",
+            "runtime": {
+                "avg": 0.08539549509684245,
+                "max": 0.08634305000305176,
+                "min": 0.08449912071228027
+            },
+            "cputime": {
+                "avg": 0.08674503333333305,
+                "max": 0.08734549999999963,
+                "min": 0.0863157999999995
+            },
+            "memory": {
+                "avg": 515.4518229166666,
+                "max": 515.45703125,
+                "min": 515.44921875
+            }
+        },
+        {
+            "method": "Anderson-Darling Test",
+            "method_class": "<class 'd3bench.tools.evidently.AndersonDarlingTest'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:51.302755",
+            "runtime": {
+                "avg": 0.0997456709543864,
+                "max": 0.10112476348876953,
+                "min": 0.09731841087341309
+            },
+            "cputime": {
+                "avg": 0.10022743333333395,
+                "max": 0.10192140000000016,
+                "min": 0.0986128000000015
+            },
+            "memory": {
+                "avg": 515.95703125,
+                "max": 515.95703125,
+                "min": 515.95703125
+            }
+        },
+        {
+            "method": "Cram\u00e9r-von Mises Test",
+            "method_class": "<class 'd3bench.tools.evidently.CramerVonMisesTest'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:52.599360",
+            "runtime": {
+                "avg": 0.09165271123250325,
+                "max": 0.09381651878356934,
+                "min": 0.09036087989807129
+            },
+            "cputime": {
+                "avg": 0.0908530333333335,
+                "max": 0.09316190000000013,
+                "min": 0.08958800000000089
+            },
+            "memory": {
+                "avg": 516.6927083333334,
+                "max": 516.703125,
+                "min": 516.6875
+            }
+        },
+        {
+            "method": "Hellinger Distance",
+            "method_class": "<class 'd3bench.tools.evidently.HellingerDistance'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:53.947099",
+            "runtime": {
+                "avg": 0.0887901782989502,
+                "max": 0.09324979782104492,
+                "min": 0.08621764183044434
+            },
+            "cputime": {
+                "avg": 0.08672120000000068,
+                "max": 0.08740820000000227,
+                "min": 0.08580289999999735
+            },
+            "memory": {
+                "avg": 517.125,
+                "max": 517.125,
+                "min": 517.125
+            }
+        },
+        {
+            "method": "Mann-Whitney U-Test",
+            "method_class": "<class 'd3bench.tools.evidently.MannWhitneyUTest'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:55.230654",
+            "runtime": {
+                "avg": 0.09268959363301595,
+                "max": 0.09679675102233887,
+                "min": 0.09011673927307129
+            },
+            "cputime": {
+                "avg": 0.08780969999999873,
+                "max": 0.08837279999999836,
+                "min": 0.08733170000000001
+            },
+            "memory": {
+                "avg": 517.125,
+                "max": 517.125,
+                "min": 517.125
+            }
+        },
+        {
+            "method": "Energy Distance",
+            "method_class": "<class 'd3bench.tools.evidently.EnergyDistance'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:56.619001",
+            "runtime": {
+                "avg": 0.09905036290486653,
+                "max": 0.10054779052734375,
+                "min": 0.0979776382446289
+            },
+            "cputime": {
+                "avg": 0.09910550000000029,
+                "max": 0.09964120000000065,
+                "min": 0.09805640000000082
+            },
+            "memory": {
+                "avg": 517.125,
+                "max": 517.125,
+                "min": 517.125
+            }
+        },
+        {
+            "method": "EPPS-Singleton Test",
+            "method_class": "<class 'd3bench.tools.evidently.EppsSingletonTest'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:57.989405",
+            "runtime": {
+                "avg": 0.09636489550272624,
+                "max": 0.09779644012451172,
+                "min": 0.09433627128601074
+            },
+            "cputime": {
+                "avg": 0.10015293333333257,
+                "max": 0.10802599999999885,
+                "min": 0.09598749999999967
+            },
+            "memory": {
+                "avg": 520.1015625,
+                "max": 520.1015625,
+                "min": 520.1015625
+            }
+        },
+        {
+            "method": "T-Test",
+            "method_class": "<class 'd3bench.tools.evidently.TTest'>",
+            "test_information": {
+                "framework": "Evidently",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-21T14:33:59.135392",
+            "runtime": {
+                "avg": 0.08094104131062825,
+                "max": 0.0823369026184082,
+                "min": 0.07979369163513184
+            },
+            "cputime": {
+                "avg": 0.07843556666666747,
+                "max": 0.07897379999999998,
+                "min": 0.07801669999999916
+            },
+            "memory": {
+                "avg": 520.3203125,
+                "max": 520.3203125,
+                "min": 520.3203125
+            }
+        }
+    ]
+]
