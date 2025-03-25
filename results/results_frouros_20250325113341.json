@@ -1,0 +1,841 @@
+[
+    [
+        {
+            "method": "Cumulative Sum Control Chart",
+            "method_class": "<class 'd3bench.tools.frouros.CumulativeSumControlChart'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:41.960614",
+            "runtime": {
+                "avg": 0.038235108057657875,
+                "max": 0.03979754447937012,
+                "min": 0.0365908145904541
+            },
+            "cputime": {
+                "avg": 0.035063133333332885,
+                "max": 0.03519519999999865,
+                "min": 0.03483869999999989
+            },
+            "memory": {
+                "avg": 1334.05859375,
+                "max": 1334.05859375,
+                "min": 1334.05859375
+            }
+        },
+        {
+            "method": "Geometric Moving Average",
+            "method_class": "<class 'd3bench.tools.frouros.GeometricMovingAverage'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:42.352196",
+            "runtime": {
+                "avg": 0.02238146464029948,
+                "max": 0.022624731063842773,
+                "min": 0.022185087203979492
+            },
+            "cputime": {
+                "avg": 0.02310909999999981,
+                "max": 0.023675499999999516,
+                "min": 0.02241689999999963
+            },
+            "memory": {
+                "avg": 1334.05859375,
+                "max": 1334.05859375,
+                "min": 1334.05859375
+            }
+        },
+        {
+            "method": "Page-Hinkley Test",
+            "method_class": "<class 'd3bench.tools.frouros.PageHinkleyTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:42.734945",
+            "runtime": {
+                "avg": 0.02287888526916504,
+                "max": 0.022922992706298828,
+                "min": 0.02279496192932129
+            },
+            "cputime": {
+                "avg": 0.022620533333334098,
+                "max": 0.02277980000000035,
+                "min": 0.022433900000001117
+            },
+            "memory": {
+                "avg": 1334.0625,
+                "max": 1334.0625,
+                "min": 1334.0625
+            }
+        },
+        {
+            "method": "Drift Detection Method",
+            "method_class": "<class 'd3bench.tools.frouros.DriftDetectionMethod'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:43.465047",
+            "runtime": {
+                "avg": 0.0602113405863444,
+                "max": 0.0760183334350586,
+                "min": 0.05166745185852051
+            },
+            "cputime": {
+                "avg": 0.05086263333333344,
+                "max": 0.05122800000000005,
+                "min": 0.05024210000000018
+            },
+            "memory": {
+                "avg": 1334.0911458333333,
+                "max": 1334.09375,
+                "min": 1334.08984375
+            }
+        },
+        {
+            "method": "EWMA Concept Drift Detection Warning",
+            "method_class": "<class 'd3bench.tools.frouros.EWMAConceptDriftDetectionWarning'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:44.726214",
+            "runtime": {
+                "avg": 0.09798924128214519,
+                "max": 0.09947061538696289,
+                "min": 0.09711742401123047
+            },
+            "cputime": {
+                "avg": 0.09596439999999913,
+                "max": 0.09664579999999923,
+                "min": 0.09551589999999877
+            },
+            "memory": {
+                "avg": 1334.1171875,
+                "max": 1334.1171875,
+                "min": 1334.1171875
+            }
+        },
+        {
+            "method": "Early Drift Detection Method",
+            "method_class": "<class 'd3bench.tools.frouros.EarlyDriftDetectionMethod'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:44.968354",
+            "runtime": {
+                "avg": 0.007331053415934245,
+                "max": 0.00739288330078125,
+                "min": 0.007235050201416016
+            },
+            "cputime": {
+                "avg": 0.007400566666666701,
+                "max": 0.007471799999999362,
+                "min": 0.007331200000001203
+            },
+            "memory": {
+                "avg": 1334.1328125,
+                "max": 1334.1328125,
+                "min": 1334.1328125
+            }
+        },
+        {
+            "method": "Hoeffding's Drift Detection Method Test-A",
+            "method_class": "<class 'd3bench.tools.frouros.HoeffdingDriftDetectionMethodTestA'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:46.569288",
+            "runtime": {
+                "avg": 0.12540038426717123,
+                "max": 0.12955498695373535,
+                "min": 0.1222693920135498
+            },
+            "cputime": {
+                "avg": 0.12432936666666687,
+                "max": 0.12474079999999965,
+                "min": 0.12389510000000037
+            },
+            "memory": {
+                "avg": 1334.2265625,
+                "max": 1334.2265625,
+                "min": 1334.2265625
+            }
+        },
+        {
+            "method": "Hoeffding's Drift Detection Method Test-W",
+            "method_class": "<class 'd3bench.tools.frouros.HoeffdingDriftDetectionMethodTestW'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:47.795547",
+            "runtime": {
+                "avg": 0.0942068099975586,
+                "max": 0.09539985656738281,
+                "min": 0.09335970878601074
+            },
+            "cputime": {
+                "avg": 0.09259473333333428,
+                "max": 0.09296820000000139,
+                "min": 0.09191919999999953
+            },
+            "memory": {
+                "avg": 1334.23046875,
+                "max": 1334.23046875,
+                "min": 1334.23046875
+            }
+        },
+        {
+            "method": "Reactive Drift Detection Method",
+            "method_class": "<class 'd3bench.tools.frouros.ReactiveDriftDetectionMethod'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:48.816212",
+            "runtime": {
+                "avg": 0.0724492867787679,
+                "max": 0.07834148406982422,
+                "min": 0.06777429580688477
+            },
+            "cputime": {
+                "avg": 0.07876603333333183,
+                "max": 0.09563949999999721,
+                "min": 0.06960619999999906
+            },
+            "memory": {
+                "avg": 1334.44140625,
+                "max": 1334.44140625,
+                "min": 1334.44140625
+            }
+        },
+        {
+            "method": "Adaptive Windowing",
+            "method_class": "<class 'd3bench.tools.frouros.AdaptiveWindowing'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:33:50.851278",
+            "runtime": {
+                "avg": 0.22372698783874512,
+                "max": 0.23983216285705566,
+                "min": 0.21551132202148438
+            },
+            "cputime": {
+                "avg": 0.21565313333333336,
+                "max": 0.21667699999999712,
+                "min": 0.21433150000000012
+            },
+            "memory": {
+                "avg": 1334.4518229166667,
+                "max": 1334.453125,
+                "min": 1334.44921875
+            }
+        },
+        {
+            "method": "Online Kolmogorov-Smirnov",
+            "method_class": "<class 'd3bench.tools.frouros.KolmogorovSmirnovWindowing'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:34:21.590153",
+            "runtime": {
+                "avg": 3.4175182978312173,
+                "max": 3.4853079319000244,
+                "min": 3.381819486618042
+            },
+            "cputime": {
+                "avg": 3.4038057333333334,
+                "max": 3.4353940000000023,
+                "min": 3.354563200000001
+            },
+            "memory": {
+                "avg": 1334.7734375,
+                "max": 1334.7734375,
+                "min": 1334.7734375
+            }
+        },
+        {
+            "method": "Statistical Test of Equal Proportions Detection",
+            "method_class": "<class 'd3bench.tools.frouros.StatisticalTestEqualProportionsDetection'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:34:25.633904",
+            "runtime": {
+                "avg": 0.44245314598083496,
+                "max": 0.4711298942565918,
+                "min": 0.404374361038208
+            },
+            "cputime": {
+                "avg": 0.44593799999999817,
+                "max": 0.45255419999999447,
+                "min": 0.43942810000000065
+            },
+            "memory": {
+                "avg": 1334.83984375,
+                "max": 1334.83984375,
+                "min": 1334.83984375
+            }
+        },
+        {
+            "method": "Online Maximum Mean Discrepancy",
+            "method_class": "<class 'd3bench.tools.frouros.OnlineMaximumMeanDiscrepancy'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:37.877805",
+            "runtime": {
+                "avg": 0.061589558919270836,
+                "max": 0.08793115615844727,
+                "min": 0.009038209915161133
+            },
+            "cputime": {
+                "avg": 0.08717486666667185,
+                "max": 0.0876480000000015,
+                "min": 0.0866986000000054
+            },
+            "memory": {
+                "avg": 1335.17578125,
+                "max": 1335.17578125,
+                "min": 1335.17578125
+            }
+        },
+        {
+            "method": "Incremental Kolmogorov-Smirnov Test",
+            "method_class": "<class 'd3bench.tools.frouros.IncrementalKolmogorovSmirnovTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:38.116647",
+            "runtime": {
+                "avg": 0.0014123121897379558,
+                "max": 0.0019533634185791016,
+                "min": 0.00040078163146972656
+            },
+            "cputime": {
+                "avg": 0.001895433333331198,
+                "max": 0.0020078000000012253,
+                "min": 0.0018294999999994843
+            },
+            "memory": {
+                "avg": 1335.17578125,
+                "max": 1335.17578125,
+                "min": 1335.17578125
+            }
+        },
+        {
+            "method": "Bhattacharyya Distance",
+            "method_class": "<class 'd3bench.tools.frouros.BhattacharyyaDistance'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:38.364905",
+            "runtime": {
+                "avg": 0.0004798571268717448,
+                "max": 0.0008003711700439453,
+                "min": 0.0002903938293457031
+            },
+            "cputime": {
+                "avg": 0.00028786666666746896,
+                "max": 0.0003013000000038346,
+                "min": 0.0002633000000002994
+            },
+            "memory": {
+                "avg": 1335.1875,
+                "max": 1335.1875,
+                "min": 1335.1875
+            }
+        },
+        {
+            "method": "Earth Mover's Distance",
+            "method_class": "<class 'd3bench.tools.frouros.EarthMoverDistance'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:38.610700",
+            "runtime": {
+                "avg": 0.00012214978535970053,
+                "max": 0.00017833709716796875,
+                "min": 6.389617919921875e-05
+            },
+            "cputime": {
+                "avg": 7.120000000308362e-05,
+                "max": 9.509999999579577e-05,
+                "min": 5.6300000011333395e-05
+            },
+            "memory": {
+                "avg": 1335.19140625,
+                "max": 1335.19140625,
+                "min": 1335.19140625
+            }
+        },
+        {
+            "method": "Energy Distance",
+            "method_class": "<class 'd3bench.tools.frouros.EnergyDistance'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:38.866843",
+            "runtime": {
+                "avg": 0.00010879834493001302,
+                "max": 0.0001704692840576172,
+                "min": 6.318092346191406e-05
+            },
+            "cputime": {
+                "avg": 8.266666666637927e-05,
+                "max": 0.00010749999999859483,
+                "min": 7.019999999613447e-05
+            },
+            "memory": {
+                "avg": 1335.1953125,
+                "max": 1335.1953125,
+                "min": 1335.1953125
+            }
+        },
+        {
+            "method": "Hellinger Distance",
+            "method_class": "<class 'd3bench.tools.frouros.HellingerDistance'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:39.128999",
+            "runtime": {
+                "avg": 0.0005746682484944662,
+                "max": 0.0007600784301757812,
+                "min": 0.00045609474182128906
+            },
+            "cputime": {
+                "avg": 0.00028670000000374785,
+                "max": 0.0003037999999975227,
+                "min": 0.00026750000000674845
+            },
+            "memory": {
+                "avg": 1335.1953125,
+                "max": 1335.1953125,
+                "min": 1335.1953125
+            }
+        },
+        {
+            "method": "Histogram Intersection Normalized Complement",
+            "method_class": "<class 'd3bench.tools.frouros.HistogramIntersectionNormalizedComplement'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:39.394060",
+            "runtime": {
+                "avg": 0.0003670056660970052,
+                "max": 0.0004930496215820312,
+                "min": 0.00029659271240234375
+            },
+            "cputime": {
+                "avg": 0.00031193333333116396,
+                "max": 0.0003303000000016709,
+                "min": 0.0002913000000006605
+            },
+            "memory": {
+                "avg": 1335.1953125,
+                "max": 1335.1953125,
+                "min": 1335.1953125
+            }
+        },
+        {
+            "method": "Jensen-Shannon Divergence Drift Detection",
+            "method_class": "<class 'd3bench.tools.frouros.JensenShannonDivergenceDriftDetection'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:39.635043",
+            "runtime": {
+                "avg": 0.0064089298248291016,
+                "max": 0.007501125335693359,
+                "min": 0.005856990814208984
+            },
+            "cputime": {
+                "avg": 0.005784366666669409,
+                "max": 0.005918100000002369,
+                "min": 0.005689700000004905
+            },
+            "memory": {
+                "avg": 1335.2734375,
+                "max": 1335.2734375,
+                "min": 1335.2734375
+            }
+        },
+        {
+            "method": "Kullback-Leibler Divergence Drift Detection",
+            "method_class": "<class 'd3bench.tools.frouros.KullbackLeiblerDivergenceDriftDetection'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:39.881050",
+            "runtime": {
+                "avg": 0.005823612213134766,
+                "max": 0.005937814712524414,
+                "min": 0.005732297897338867
+            },
+            "cputime": {
+                "avg": 0.005755133333333144,
+                "max": 0.0058539000000052965,
+                "min": 0.005671500000005381
+            },
+            "memory": {
+                "avg": 1335.27734375,
+                "max": 1335.27734375,
+                "min": 1335.27734375
+            }
+        },
+        {
+            "method": "Batch Maximum Mean Discrepancy",
+            "method_class": "<class 'd3bench.tools.frouros.BatchMaximumMeanDiscrepancy'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:40.136613",
+            "runtime": {
+                "avg": 0.00010021527608235677,
+                "max": 0.0001342296600341797,
+                "min": 7.939338684082031e-05
+            },
+            "cputime": {
+                "avg": 8.406666665905504e-05,
+                "max": 9.380000000192013e-05,
+                "min": 7.91999999876225e-05
+            },
+            "memory": {
+                "avg": 1335.27734375,
+                "max": 1335.27734375,
+                "min": 1335.27734375
+            }
+        },
+        {
+            "method": "Population Stability Index",
+            "method_class": "<class 'd3bench.tools.frouros.PopulationStabilityIndex'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:40.395548",
+            "runtime": {
+                "avg": 0.0004836718241373698,
+                "max": 0.000873565673828125,
+                "min": 0.0002796649932861328
+            },
+            "cputime": {
+                "avg": 0.0002830666666587452,
+                "max": 0.00030150000000617183,
+                "min": 0.0002714999999966494
+            },
+            "memory": {
+                "avg": 1335.27734375,
+                "max": 1335.27734375,
+                "min": 1335.27734375
+            }
+        },
+        {
+            "method": "Anderson-Darling Test",
+            "method_class": "<class 'd3bench.tools.frouros.AndersonDarlingTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:40.639657",
+            "runtime": {
+                "avg": 0.00044353802998860675,
+                "max": 0.0008349418640136719,
+                "min": 0.00024366378784179688
+            },
+            "cputime": {
+                "avg": 0.0002625000000098983,
+                "max": 0.0002985000000137461,
+                "min": 0.00022200000000793807
+            },
+            "memory": {
+                "avg": 1335.27734375,
+                "max": 1335.27734375,
+                "min": 1335.27734375
+            }
+        },
+        {
+            "method": "Baumgartner Weiss Schindler Test",
+            "method_class": "<class 'd3bench.tools.frouros.BaumgartnerWeissSchindlerTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:40.830049",
+            "runtime": {
+                "avg": 0.0016713142395019531,
+                "max": 0.00243377685546875,
+                "min": 0.0011789798736572266
+            },
+            "cputime": {
+                "avg": 0.0012097333333353315,
+                "max": 0.0014730999999983396,
+                "min": 0.0009751000000051135
+            },
+            "memory": {
+                "avg": 1335.40234375,
+                "max": 1335.40234375,
+                "min": 1335.40234375
+            }
+        },
+        {
+            "method": "Chi-square Test",
+            "method_class": "<class 'd3bench.tools.frouros.ChiSquareTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:41.100738",
+            "runtime": {
+                "avg": 0.0008948644002278646,
+                "max": 0.001748800277709961,
+                "min": 0.0004603862762451172
+            },
+            "cputime": {
+                "avg": 0.00043820000000020326,
+                "max": 0.0004518000000075517,
+                "min": 0.000419200000010278
+            },
+            "memory": {
+                "avg": 1335.4609375,
+                "max": 1335.4609375,
+                "min": 1335.4609375
+            }
+        },
+        {
+            "method": "Cram\u00e9r-von Mises Test",
+            "method_class": "<class 'd3bench.tools.frouros.CramerVonMisesTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:41.264904",
+            "runtime": {
+                "avg": 0.002037604649861654,
+                "max": 0.0026526451110839844,
+                "min": 0.0017251968383789062
+            },
+            "cputime": {
+                "avg": 0.0017312000000041887,
+                "max": 0.0018685000000004948,
+                "min": 0.0016521999999952186
+            },
+            "memory": {
+                "avg": 1335.62890625,
+                "max": 1335.62890625,
+                "min": 1335.62890625
+            }
+        },
+        {
+            "method": "Kolmogorov-Smirnov Test",
+            "method_class": "<class 'd3bench.tools.frouros.KolmogorovSmirnovTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:41.538041",
+            "runtime": {
+                "avg": 0.0010114510854085286,
+                "max": 0.0014452934265136719,
+                "min": 0.0006380081176757812
+            },
+            "cputime": {
+                "avg": 0.0006454999999903066,
+                "max": 0.0006741999999917425,
+                "min": 0.0006305999999938194
+            },
+            "memory": {
+                "avg": 1335.62890625,
+                "max": 1335.62890625,
+                "min": 1335.62890625
+            }
+        },
+        {
+            "method": "Kuiper's Test",
+            "method_class": "<class 'd3bench.tools.frouros.KuiperTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:41.786722",
+            "runtime": {
+                "avg": 0.0009324550628662109,
+                "max": 0.0012087821960449219,
+                "min": 0.0006771087646484375
+            },
+            "cputime": {
+                "avg": 0.000670700000010053,
+                "max": 0.0006873000000098273,
+                "min": 0.0006585000000143282
+            },
+            "memory": {
+                "avg": 1335.62890625,
+                "max": 1335.62890625,
+                "min": 1335.62890625
+            }
+        },
+        {
+            "method": "Mann-Whitney U-Test",
+            "method_class": "<class 'd3bench.tools.frouros.MannWhitneyUTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:42.036795",
+            "runtime": {
+                "avg": 0.0011636416117350261,
+                "max": 0.0014736652374267578,
+                "min": 0.0009927749633789062
+            },
+            "cputime": {
+                "avg": 0.0009306666666664872,
+                "max": 0.0010370999999906871,
+                "min": 0.0008143000000018219
+            },
+            "memory": {
+                "avg": 1335.62890625,
+                "max": 1335.62890625,
+                "min": 1335.62890625
+            }
+        },
+        {
+            "method": "Welch's T-Test",
+            "method_class": "<class 'd3bench.tools.frouros.WelchTTest'>",
+            "test_information": {
+                "framework": "Frouros",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T11:35:42.211948",
+            "runtime": {
+                "avg": 0.002285480499267578,
+                "max": 0.0030448436737060547,
+                "min": 0.0018918514251708984
+            },
+            "cputime": {
+                "avg": 0.001867900000007694,
+                "max": 0.0018704999999954453,
+                "min": 0.001866300000017418
+            },
+            "memory": {
+                "avg": 1335.6653645833333,
+                "max": 1335.66796875,
+                "min": 1335.6640625
+            }
+        }
+    ]
+]
