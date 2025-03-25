@@ -37,7 +37,7 @@ class Dataset(ABC):
 
     def __init__(self, settings: Optional[Options] = None):
         settings = settings or Options()
-        self.df: pd.DataFrame = pd.read_csv(config.data_path / self.file_name)
+        self.df: pd.DataFrame = pd.read_csv(config.data_path / self.file_name, low_memory=False)
         self.df["time"] = self.preprocess_time()
         self.data_start = settings.data_start
         self.data_end = settings.data_end
