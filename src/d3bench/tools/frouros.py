@@ -3,7 +3,6 @@
 from typing import Any
 
 from abc import ABC, abstractmethod
-import pandas as pd
 from frouros.detectors import concept_drift, data_drift
 import numpy as np
 

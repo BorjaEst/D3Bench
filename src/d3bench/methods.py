@@ -47,6 +47,7 @@ class OnlineCD(StrEnum):
 
     # Other
     CHANGE_DETECTION_DATA_STREAMS = "Change Detection in Data Streams"
+    PERIODIC_TRIGGER = "Periodic Trigger"
 
 
 # Online Unsupervised Data Drift Detection

@@ -26,4 +26,5 @@ TOOLS: dict[Framework, Type[Tool]] = {
     "Evidently": tools.Evidently,
     "NannyML": tools.NannyML,
     "Alibi-Detect": tools.AlibiDetect,
+    "River": tools.River,
 }

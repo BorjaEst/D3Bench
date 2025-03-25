@@ -16,6 +16,7 @@ import d3bench.tools.alibi as tools_alibi
 import d3bench.tools.evidently as tools_evidently
 import d3bench.tools.frouros as tools_frouros
 import d3bench.tools.nannyml as tools_nannyml
+import d3bench.tools.river as tools_river
 from d3bench import methods
 from d3bench.config import Framework
 from d3bench.utils import Data
@@ -216,14 +217,25 @@ class AlibiDetect(Tool):
 
 class River(Tool):
 
-    name: Framework = ""
-    online_cd_methods: dict[methods.OnlineCD, Any] = {}
+    name: Framework = "River"
+    online_cd_methods: dict[methods.OnlineCD, Any] = {
+        methods.OnlineCD.ADAPTIVE_WINDOWING: tools_river.AdaptiveWindowing,
+        # methods.OnlineCD.DRIFT_DETECTION_METHOD: tools_river.DriftDetectionMethod,  TODO: ValueError: math domain error
+        methods.OnlineCD.EWMA_CONCEPT_DRIFT_DETECTION_WARNING: tools_river.EarlyDriftDetectionMethod,
+        methods.OnlineCD.HOEFFDING_DRIFT_DETECTION_METHOD_TEST_A: tools_river.HoeffdingDriftDetectionMethodTestA,
+        methods.OnlineCD.HOEFFDING_DRIFT_DETECTION_METHOD_TEST_W: tools_river.HoeffdingDriftDetectionMethodTestW,
+        methods.OnlineCD.ONLINE_KOLMOGOROV_SMIRNOV: tools_river.OnlineKolmogorovSmirnov,
+        methods.OnlineCD.PAGE_HINKLEY_TEST: tools_river.PageHinkleyTest,
+        methods.OnlineCD.PERIODIC_TRIGGER: tools_river.PeriodicTrigger,
+    }
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        raise NotImplementedError
+        df.drop(columns={"time"}, inplace=True)
+        data = [df[feature].to_numpy() for feature in df.columns]
+        return np.stack(data).T
 
 
 class Menelau(Tool):

@@ -1,0 +1,147 @@
+"""Module for River Detect detectors."""
+
+from typing import Any
+
+from abc import ABC, abstractmethod
+import numpy as np
+from river import drift
+
+from d3bench import utils
+
+
+# Online Supervised Concept Drift Detection
+
+
+class BaseOnlineTest(utils.BaseTestMethod, ABC):
+    """Base class for online univariate drift detectors."""
+
+    def __init__(self, features: list[str]) -> None:
+        self.features = features
+        self.detector = self.detector_class(**self.config)
+        self.drift: Any
+
+    @property
+    @abstractmethod
+    def config(self) -> Any:
+        """Property that returns the detector configuration."""
+
+    @property
+    @abstractmethod
+    def detector_class(self) -> Any:
+        """Property that returns the detector class."""
+
+    def fit(self, x_reference: np.ndarray) -> None:
+        # Detector is trained one by one on the reference data
+        # See:
+        # https://frouros.readthedocs.io/en/latest/examples/concept_drift/DDM_advance.html#warm-up-phase
+        # !!! only 1000 instances are used for training, very high time consumption
+        for x in np.linalg.norm(x_reference[:1000], ord=2, axis=1):
+            self.detector.update(x)
+
+    def test(self, x_test: np.ndarray) -> None:
+        # Only one feature is accepted
+        for x in np.linalg.norm(x_test, ord=2, axis=1):
+            self.detector.update(x)
+
+    def result(self) -> dict[str, Any]:
+        raise NotImplementedError("Method not implemented.")
+
+
+class AdaptiveWindowing(BaseOnlineTest):
+    """Online Maximum Mean Discrepancy"""
+
+    detector_class = drift.ADWIN
+    config = {
+        "delta": 0.002,
+        "clock": 32,
+        "max_buckets": 5,
+        "min_window_length": 5,
+        "grace_period": 10,
+    }
+
+
+class DriftDetectionMethod(BaseOnlineTest):
+    """Drift Detection Method"""
+
+    detector_class = drift.binary.DDM
+    config = {
+        "warm_start": 30,
+        "warning_threshold": 2.0,
+        "drift_threshold": 3.0,
+    }
+
+
+class EarlyDriftDetectionMethod(BaseOnlineTest):
+    """Early Drift Detection Method"""
+
+    detector_class = drift.binary.EDDM
+    config = {
+        "warm_start": 30,
+        "alpha": 0.95,
+        "beta": 0.9,
+    }
+
+
+class HoeffdingDriftDetectionMethodTestA(BaseOnlineTest):
+    """Hoeffding Drift Detection Method Test A"""
+
+    detector_class = drift.binary.HDDM_A
+    config = {
+        "drift_confidence": 0.001,
+        "warning_confidence": 0.005,
+        "two_sided_test": False,
+    }
+
+
+class HoeffdingDriftDetectionMethodTestW(BaseOnlineTest):
+    """Hoeffding Drift Detection Method Test W"""
+
+    detector_class = drift.binary.HDDM_W
+    config = {
+        "drift_confidence": 0.001,
+        "warning_confidence": 0.005,
+        "lambda_val": 0.05,
+        "two_sided_test": False,
+    }
+
+
+class OnlineKolmogorovSmirnov(BaseOnlineTest):
+    """Online Kolmogorov-Smirnov"""
+
+    detector_class = drift.KSWIN
+    config = {
+        "alpha": 0.005,
+        "window_size": 100,
+        "stat_size": 30,
+        "seed": None,
+        "window": None,
+    }
+
+
+class PageHinkleyTest(BaseOnlineTest):
+    """Page Hinkley Test"""
+
+    detector_class = drift.PageHinkley
+    config = {
+        "min_instances": 30,
+        "delta": 0.005,
+        "threshold": 50.0,
+        "alpha": 1 - 0.0001,
+        "mode": "both",
+    }
+
+
+class PeriodicTrigger(BaseOnlineTest):
+    """Periodic Trigger
+    Changelog: 0.15.0 - 2023-01-29
+    - Renamed `drift.PeriodicTrigger` to `drift.DummyDriftDetector` to clarify it is a naive baseline.
+    """
+
+    detector_class = drift.DummyDriftDetector
+    config = {
+        "trigger_method": "fixed",
+        "t_0": 300,
+        "w": 0,
+        "dynamic_cloning": False,
+        "seed": None,
+    }

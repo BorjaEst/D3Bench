@@ -31,6 +31,7 @@ Framework: TypeAlias = Literal[
     "Evidently",
     "NannyML",
     "Alibi-Detect",
+    "River",
 ]
 
 # Define the available datasets for the benchmark
