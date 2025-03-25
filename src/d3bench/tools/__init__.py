@@ -81,18 +81,18 @@ class Frouros(Tool):
     name: Framework = "Frouros"
     online_cd_methods: dict[methods.OnlineCD, Any] = {
         # methods.OnlineCD.BAYESIAN_ONLINE_CHANGE_DETECTION: tools_frouros.BayesianOnlineChangeDetection,
-        # methods.OnlineCD.CUMULATIVE_SUM_CONTROL_CHART: tools_frouros.CumulativeSumControlChart,
-        # methods.OnlineCD.GEOMETRIC_MOVING_AVERAGE: tools_frouros.GeometricMovingAverage,
-        # methods.OnlineCD.PAGE_HINKLEY_TEST: tools_frouros.PageHinkleyTest,
-        # methods.OnlineCD.DRIFT_DETECTION_METHOD: tools_frouros.DriftDetectionMethod,
-        # methods.OnlineCD.EWMA_CONCEPT_DRIFT_DETECTION_WARNING: tools_frouros.EWMAConceptDriftDetectionWarning,
-        # methods.OnlineCD.EARLY_DRIFT_DETECTION_METHOD: tools_frouros.EarlyDriftDetectionMethod,
-        # methods.OnlineCD.HOEFFDING_DRIFT_DETECTION_METHOD_TEST_A: tools_frouros.HoeffdingDriftDetectionMethodTestA,
-        # methods.OnlineCD.HOEFFDING_DRIFT_DETECTION_METHOD_TEST_W: tools_frouros.HoeffdingDriftDetectionMethodTestW,
-        # methods.OnlineCD.REACTIVE_DRIFT_DETECTION_METHOD: tools_frouros.ReactiveDriftDetectionMethod,
-        # methods.OnlineCD.ADAPTIVE_WINDOWING: tools_frouros.AdaptiveWindowing,
+        methods.OnlineCD.CUMULATIVE_SUM_CONTROL_CHART: tools_frouros.CumulativeSumControlChart,
+        methods.OnlineCD.GEOMETRIC_MOVING_AVERAGE: tools_frouros.GeometricMovingAverage,
+        methods.OnlineCD.PAGE_HINKLEY_TEST: tools_frouros.PageHinkleyTest,
+        methods.OnlineCD.DRIFT_DETECTION_METHOD: tools_frouros.DriftDetectionMethod,
+        methods.OnlineCD.EWMA_CONCEPT_DRIFT_DETECTION_WARNING: tools_frouros.EWMAConceptDriftDetectionWarning,
+        methods.OnlineCD.EARLY_DRIFT_DETECTION_METHOD: tools_frouros.EarlyDriftDetectionMethod,
+        methods.OnlineCD.HOEFFDING_DRIFT_DETECTION_METHOD_TEST_A: tools_frouros.HoeffdingDriftDetectionMethodTestA,
+        methods.OnlineCD.HOEFFDING_DRIFT_DETECTION_METHOD_TEST_W: tools_frouros.HoeffdingDriftDetectionMethodTestW,
+        methods.OnlineCD.REACTIVE_DRIFT_DETECTION_METHOD: tools_frouros.ReactiveDriftDetectionMethod,
+        methods.OnlineCD.ADAPTIVE_WINDOWING: tools_frouros.AdaptiveWindowing,
         methods.OnlineCD.KOLMOGOROV_SMIRNOV_WINDOWING: tools_frouros.KolmogorovSmirnovWindowing,
-        # methods.OnlineCD.STATISTICAL_TEST_EQUAL_PROPORTIONS_DETECTION: tools_frouros.StatisticalTestEqualProportionsDetection,
+        methods.OnlineCD.STATISTICAL_TEST_EQUAL_PROPORTIONS_DETECTION: tools_frouros.StatisticalTestEqualProportionsDetection,
     }
     online_dd_methods: dict[methods.OnlineDD, Any] = {
         methods.OnlineDD.ONLINE_MAXIMUM_MEAN_DISCREPANCY: tools_frouros.OnlineMaximumMeanDiscrepancy,
@@ -186,13 +186,16 @@ class AlibiDetect(Tool):
     name: Framework = "Alibi-Detect"
     online_cd_methods: dict[methods.OnlineCD, Any] = {}
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
-    batch_cd_methods: dict[methods.BatchCD, Any] = {}
-    batch_dd_methods: dict[methods.BatchDD, Any] = {
-        # methods.BatchDD.KS: tools_alibi.KSTest,
+    batch_cd_methods: dict[methods.BatchCD, Any] = {
+        methods.BatchCD.KOLMOGOROV_SMIRNOV_TEST: tools_alibi.KolmogorovSmirnovTest,
     }
 
-    def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        raise NotImplementedError
+    batch_dd_methods: dict[methods.BatchDD, Any] = {}
+
+    def preprocess(self, df: pd.DataFrame) -> np.ndarray:
+        df.drop(columns={"time"}, inplace=True)
+        data = [df[feature].to_numpy() for feature in df.columns]
+        return np.stack(data).T
 
 
 class River(Tool):

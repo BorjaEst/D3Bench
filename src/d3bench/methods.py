@@ -76,6 +76,8 @@ class BatchCD(StrEnum):
     Use Cases: Periodic model validation, offline analysis of model decay.
     """
 
+    KOLMOGOROV_SMIRNOV_TEST = "Kolmogorov-Smirnov Test"
+
 
 # Batch Data Drift Detection
 class BatchDD(StrEnum):
