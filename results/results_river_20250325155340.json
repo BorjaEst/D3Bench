@@ -1,0 +1,193 @@
+[
+    [
+        {
+            "method": "Adaptive Windowing",
+            "method_class": "<class 'd3bench.tools.river.AdaptiveWindowing'>",
+            "test_information": {
+                "framework": "River",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T15:53:40.839555",
+            "runtime": {
+                "avg": 0.020196835199991863,
+                "max": 0.02142620086669922,
+                "min": 0.019565105438232422
+            },
+            "cputime": {
+                "avg": 0.019555033333333565,
+                "max": 0.01980810000000055,
+                "min": 0.019345299999999455
+            },
+            "memory": {
+                "avg": 1336.2265625,
+                "max": 1336.2265625,
+                "min": 1336.2265625
+            }
+        },
+        {
+            "method": "EWMA Concept Drift Detection Warning",
+            "method_class": "<class 'd3bench.tools.river.EarlyDriftDetectionMethod'>",
+            "test_information": {
+                "framework": "River",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T15:53:41.107796",
+            "runtime": {
+                "avg": 0.0014030933380126953,
+                "max": 0.001415252685546875,
+                "min": 0.001379251480102539
+            },
+            "cputime": {
+                "avg": 0.001455833333333582,
+                "max": 0.0015321000000003693,
+                "min": 0.0014111000000003315
+            },
+            "memory": {
+                "avg": 1336.2265625,
+                "max": 1336.2265625,
+                "min": 1336.2265625
+            }
+        },
+        {
+            "method": "Hoeffding's Drift Detection Method Test-A",
+            "method_class": "<class 'd3bench.tools.river.HoeffdingDriftDetectionMethodTestA'>",
+            "test_information": {
+                "framework": "River",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T15:53:43.289054",
+            "runtime": {
+                "avg": 0.233705202738444,
+                "max": 0.2386322021484375,
+                "min": 0.22890233993530273
+            },
+            "cputime": {
+                "avg": 0.23514983333333342,
+                "max": 0.24322219999999994,
+                "min": 0.22715810000000047
+            },
+            "memory": {
+                "avg": 1336.2265625,
+                "max": 1336.2265625,
+                "min": 1336.2265625
+            }
+        },
+        {
+            "method": "Hoeffding's Drift Detection Method Test-W",
+            "method_class": "<class 'd3bench.tools.river.HoeffdingDriftDetectionMethodTestW'>",
+            "test_information": {
+                "framework": "River",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T15:53:45.511629",
+            "runtime": {
+                "avg": 0.18362784385681152,
+                "max": 0.2078571319580078,
+                "min": 0.16945219039916992
+            },
+            "cputime": {
+                "avg": 0.17366536666666654,
+                "max": 0.174374499999999,
+                "min": 0.17226289999999977
+            },
+            "memory": {
+                "avg": 1336.2265625,
+                "max": 1336.2265625,
+                "min": 1336.2265625
+            }
+        },
+        {
+            "method": "Online Kolmogorov-Smirnov",
+            "method_class": "<class 'd3bench.tools.river.OnlineKolmogorovSmirnov'>",
+            "test_information": {
+                "framework": "River",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T15:53:59.998183",
+            "runtime": {
+                "avg": 1.5789274374643962,
+                "max": 1.658104658126831,
+                "min": 1.4345006942749023
+            },
+            "cputime": {
+                "avg": 1.6220068333333348,
+                "max": 1.6379147000000032,
+                "min": 1.6011915000000023
+            },
+            "memory": {
+                "avg": 1336.28515625,
+                "max": 1336.28515625,
+                "min": 1336.28515625
+            }
+        },
+        {
+            "method": "Page-Hinkley Test",
+            "method_class": "<class 'd3bench.tools.river.PageHinkleyTest'>",
+            "test_information": {
+                "framework": "River",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T15:54:00.230161",
+            "runtime": {
+                "avg": 0.007410685221354167,
+                "max": 0.007796764373779297,
+                "min": 0.007181406021118164
+            },
+            "cputime": {
+                "avg": 0.007249500000001537,
+                "max": 0.007300100000001919,
+                "min": 0.00719100000000239
+            },
+            "memory": {
+                "avg": 1336.28515625,
+                "max": 1336.28515625,
+                "min": 1336.28515625
+            }
+        },
+        {
+            "method": "Periodic Trigger",
+            "method_class": "<class 'd3bench.tools.river.PeriodicTrigger'>",
+            "test_information": {
+                "framework": "River",
+                "run_on_vm": false,
+                "repetitions": 3,
+                "len_reference": 96496,
+                "len_testing": 8644
+            },
+            "time": "2025-03-25T15:54:00.469737",
+            "runtime": {
+                "avg": 0.001191854476928711,
+                "max": 0.0011973381042480469,
+                "min": 0.0011861324310302734
+            },
+            "cputime": {
+                "avg": 0.0012073999999984153,
+                "max": 0.0012244999999992956,
+                "min": 0.0011975999999975784
+            },
+            "memory": {
+                "avg": 1336.28515625,
+                "max": 1336.28515625,
+                "min": 1336.28515625
+            }
+        }
+    ]
+]
