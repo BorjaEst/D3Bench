@@ -80,7 +80,7 @@ class Frouros(Tool):
 
     name: Framework = "Frouros"
     online_cd_methods: dict[methods.OnlineCD, Any] = {
-        # methods.OnlineCD.BAYESIAN_ONLINE_CHANGE_DETECTION: tools_frouros.BayesianOnlineChangeDetection,
+        # methods.OnlineCD.BAYESIAN_ONLINE_CHANGE_DETECTION: tools_frouros.BayesianOnlineChangeDetection,  # TODO: Very long evaluation times for 100k ref data
         methods.OnlineCD.CUMULATIVE_SUM_CONTROL_CHART: tools_frouros.CumulativeSumControlChart,
         methods.OnlineCD.GEOMETRIC_MOVING_AVERAGE: tools_frouros.GeometricMovingAverage,
         methods.OnlineCD.PAGE_HINKLEY_TEST: tools_frouros.PageHinkleyTest,
@@ -91,7 +91,7 @@ class Frouros(Tool):
         methods.OnlineCD.HOEFFDING_DRIFT_DETECTION_METHOD_TEST_W: tools_frouros.HoeffdingDriftDetectionMethodTestW,
         methods.OnlineCD.REACTIVE_DRIFT_DETECTION_METHOD: tools_frouros.ReactiveDriftDetectionMethod,
         methods.OnlineCD.ADAPTIVE_WINDOWING: tools_frouros.AdaptiveWindowing,
-        methods.OnlineCD.KOLMOGOROV_SMIRNOV_WINDOWING: tools_frouros.KolmogorovSmirnovWindowing,
+        methods.OnlineCD.ONLINE_KOLMOGOROV_SMIRNOV: tools_frouros.KolmogorovSmirnovWindowing,
         methods.OnlineCD.STATISTICAL_TEST_EQUAL_PROPORTIONS_DETECTION: tools_frouros.StatisticalTestEqualProportionsDetection,
     }
     online_dd_methods: dict[methods.OnlineDD, Any] = {
@@ -184,10 +184,26 @@ class AlibiDetect(Tool):
     """Alibi-Detect drift detection tool."""
 
     name: Framework = "Alibi-Detect"
-    online_cd_methods: dict[methods.OnlineCD, Any] = {}
+    online_cd_methods: dict[methods.OnlineCD, Any] = {
+        # methods.OnlineCD.ONLINE_MAXIMUM_MEAN_DISCREPANCY: tools_alibi.OnlineMaximumMeanDiscrepancy, TODO: OOM when allocating tensor with shape[96496,96496]
+        # methods.OnlineCD.ONLINE_LEAST_SQUARES_DENSITY_DIFFERENCE: tools_alibi.OnlineLeastSquaresDensityDifference, TODO: OOM when allocating tensor with shape[96496,96496]
+        # methods.OnlineCD.ONLINE_CRAMER_VON_MISES_TEST: tools_alibi.OnlineCramerVonMisesTest,  TODO: _ArrayMemoryError: Unable to allocate 555. GiB for an array with shape (64, 96515, 96515)
+        # methods.OnlineCD.ONLINE_FISHER_EXACT_TEST: tools_alibi.OnlineFisherExactTest,  TODO: ValueError: The `x_ref` data must consist of only (0,1)'s or (False,True)'s for the FETDriftOnline detector.
+    }
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {
+        methods.BatchCD.CHI_SQUARE_TEST: tools_alibi.ChiSquareTest,
         methods.BatchCD.KOLMOGOROV_SMIRNOV_TEST: tools_alibi.KolmogorovSmirnovTest,
+        methods.BatchCD.CRAMER_VON_MISES_TEST: tools_alibi.CramerVonMisesTest,
+        # methods.BatchCD.FISHER_EXACT_TEST: tools_alibi.FisherExactTest, TODO: ValueError: The `x_ref` data must consist of only (0,1)'s or (False,True)'s for the FETDrift detector.
+        # methods.BatchCD.MAXIMUM_MEAN_DISCREPANCY: tools_alibi.MaximumMeanDiscrepancy, TODO: OOM when allocating tensor
+        # methods.BatchCD.LEAST_SQUARES_DENSITY_DIFFERENCE: tools_alibi.LeastSquaresDensityDifference, TODO: OOM when allocating tensor
+        # methods.BatchCD.LEARNED_KERNEL_DRIFT_DETECTION: tools_alibi.LearnedKernelDriftDetection, TODO: Fix implementation
+        # methods.BatchCD.CLASSIFIER_DRIFT_DETECTOR: tools_alibi.ClassifierDriftDetector, TODO: Fix implementation
+        # methods.BatchCD.SPOT_DIFF_DRIFT_DETECTOR: tools_alibi.SpotTheDiffDriftDetector, TODO: Fix implementation
+        # methods.BatchCD.CLASSIFIER_UNCERTAINTY_DRIFT_DETECTOR: tools_alibi.ClassifierUncertaintyDriftDetector, TODO: Fix implementation
+        # methods.BatchCD.CONTEXT_AWARE_MAXIMUM_MEAN_DISCREPANCY: tools_alibi.ContextAwareMaximumMeanDiscrepancy, TODO: Fix implementation
+        methods.BatchCD.MIXED_TYPE_TABULAR_DATA: tools_alibi.MixedTypeTabularData,
     }
 
     batch_dd_methods: dict[methods.BatchDD, Any] = {}

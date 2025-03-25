@@ -38,9 +38,12 @@ class OnlineCD(StrEnum):
 
     # Window Based
     ADAPTIVE_WINDOWING = "Adaptive Windowing"
-    KOLMOGOROV_SMIRNOV_WINDOWING = "Kolmogorov-Smirnov Windowing"
-    ONLINE_ACCURACY_UPDATED_ENSEMBLE = "Online Accuracy Updated Ensemble"
     STATISTICAL_TEST_EQUAL_PROPORTIONS_DETECTION = "Statistical Test of Equal Proportions Detection"
+    ONLINE_KOLMOGOROV_SMIRNOV = "Online Kolmogorov-Smirnov"
+    ONLINE_ACCURACY_UPDATED_ENSEMBLE = "Online Accuracy Updated Ensemble"
+    ONLINE_MAXIMUM_MEAN_DISCREPANCY = "Online Maximum Mean Discrepancy"
+    ONLINE_CRAMER_VON_MISES_TEST = "Online Cramér-von Mises Test"
+    ONLINE_FISHER_EXACT_TEST = "Online Fisher Exact Test"
 
     # Other
     CHANGE_DETECTION_DATA_STREAMS = "Change Detection in Data Streams"
@@ -76,7 +79,15 @@ class BatchCD(StrEnum):
     Use Cases: Periodic model validation, offline analysis of model decay.
     """
 
+    # TODO: add subclassification
+
+    CHI_SQUARE_TEST = "Chi-square Test"
     KOLMOGOROV_SMIRNOV_TEST = "Kolmogorov-Smirnov Test"
+    CRAMER_VON_MISES_TEST = "Cramér-von Mises Test"
+    FISHER_EXACT_TEST = "Fisher Exact Test"
+    MAXIMUM_MEAN_DISCREPANCY = "Maximum Mean Discrepancy"
+    LEAST_SQUARES_DENSITY_DIFFERENCE = "Least-Squares Density Difference"
+    MIXED_TYPE_TABULAR_DATA = "Mixed-Type Tabular Data"
 
 
 # Batch Data Drift Detection
