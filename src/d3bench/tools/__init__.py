@@ -15,6 +15,7 @@ from pydantic_settings import BaseSettings
 import d3bench.tools.alibi as tools_alibi
 import d3bench.tools.evidently as tools_evidently
 import d3bench.tools.frouros as tools_frouros
+import d3bench.tools.menelaus as tools_menelaus
 import d3bench.tools.nannyml as tools_nannyml
 import d3bench.tools.river as tools_river
 from d3bench import methods
@@ -216,6 +217,7 @@ class AlibiDetect(Tool):
 
 
 class River(Tool):
+    """River drift detection tool."""
 
     name: Framework = "River"
     online_cd_methods: dict[methods.OnlineCD, Any] = {
@@ -238,19 +240,23 @@ class River(Tool):
         return np.stack(data).T
 
 
-class Menelau(Tool):
+class Menelaus(Tool):
+    """Menelaus drift detection tool."""
 
-    name: Framework = ""
-    online_cd_methods: dict[methods.OnlineCD, Any] = {}
+    name: Framework = "Menelaus"
+    online_cd_methods: dict[methods.OnlineCD, Any] = {
+        methods.OnlineCD.CUMULATIVE_SUM_CONTROL_CHART: tools_menelaus.CumulativeSumControlChart,
+    }
     online_dd_methods: dict[methods.OnlineDD, Any] = {}
     batch_cd_methods: dict[methods.BatchCD, Any] = {}
     batch_dd_methods: dict[methods.BatchDD, Any] = {}
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        raise NotImplementedError
+        return df  # No preprocessing needed
 
 
 class TorchDrift(Tool):
+    """TorchDrift drift detection tool."""
 
     name: Framework = ""
     online_cd_methods: dict[methods.OnlineCD, Any] = {}

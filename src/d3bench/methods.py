@@ -48,6 +48,8 @@ class OnlineCD(StrEnum):
     # Other
     CHANGE_DETECTION_DATA_STREAMS = "Change Detection in Data Streams"
     PERIODIC_TRIGGER = "Periodic Trigger"
+    LINEAR_FOUR_RATES = "Linear Four Rates"
+    MARGIN_DENSITY_DRIFT_DETECTION_METHOD = "Margin Density Drift Detection Method"
 
 
 # Online Unsupervised Data Drift Detection

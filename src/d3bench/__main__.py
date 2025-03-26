@@ -49,7 +49,7 @@ class Arguments(BaseArguments):
         description="Criteria to test.",
     )
     tools: set[Framework] = Field(
-        default=set(["River"]),
+        default=set(["Menelaus"]),
         description="List of tools to benchmark.",
     )
     datafile: Datafile = Field(
