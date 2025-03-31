@@ -1,9 +1,9 @@
 # Everything except this folder
 /*
 !.gitignore
-!results_alibidetect_20250325112836.json
-!results_evidently_20250321143343.json
-!results_frouros_20250325113341.json
-!results_nannyml_20250321103604.json
-!results_river_20250325155340.json
-!visualization.ipynb
+!results_alibidetect_*.json
+!results_evidently_*.json
+!results_frouros_*.json
+!results_nannyml_*.json
+!results_river_*.json
+!visualization_*.ipynb
