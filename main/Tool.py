@@ -1,7 +1,7 @@
-from evidently.report import Report
-from evidently.metric_preset import DataDriftPreset
-from evidently.metrics import *
-from evidently import ColumnMapping
+from evidently.legacy.report import Report
+from evidently.legacy.metric_preset import DataDriftPreset
+from evidently.legacy.metrics import *
+from evidently.legacy.pipeline.column_mapping import ColumnMapping
 
 import nannyml as nml # pip install nannyml
 
