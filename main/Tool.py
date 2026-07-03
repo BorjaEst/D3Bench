@@ -5,9 +5,10 @@ from evidently.legacy.pipeline.column_mapping import ColumnMapping
 
 import nannyml as nml # pip install nannyml
 
-from alibi_detect.cd import KSDrift, CVMDrift, SpotTheDiffDrift
+from alibi_detect.cd import KSDrift, CVMDrift, SpotTheDiffDrift, MMDDrift, LSDDDrift
 
 from enum import Enum
+import os
 import pandas as pd # pip install pandas
 import numpy as np
 import matplotlib
@@ -38,15 +39,22 @@ class Tool:
     def __init__(self, name):
         self.name = name
         self.showReport = False
+        self.dataset_name = "default"
 
     def preprocess(self):
         pass
-    
+
     def runDriftdetection(self, ref, cur, building_id):
         pass
-    
+
     def __runDriftdetectiontest(self, building_id, test):
         pass
+
+    # anchors report output to main/results/reports/<dataset>/<tool>/ regardless of the CWD the script is run from
+    def _report_path(self, tool_folder, file_name):
+        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results', 'reports', self.dataset_name, tool_folder)
+        os.makedirs(base_dir, exist_ok=True)
+        return os.path.join(base_dir, file_name)
 
 class Evidently(Tool):
     def __init__(self, name, showReport=False):
@@ -117,7 +125,7 @@ class Evidently(Tool):
         ])
         report.run(reference_data=self.ref, current_data=self.cur)
         if(self.showReport):
-            file_name = "evidently_report_{}_{}.html".format(building_id, test)
+            file_name = self._report_path('evidently', "evidently_report_{}_{}.html".format(building_id, test))
             report.save_html(file_name)
         report_dict = report.as_dict()
 
@@ -189,9 +197,9 @@ class NannyML(Tool):
 
         if(self.showReport):
             figure = results.filter(column_names=results.continuous_column_names, methods=[test]).plot(kind='distribution')
-            figure.write_image(f'nannyml_report_dist_{building_id}_{test}.svg')
+            figure.write_image(self._report_path('nannyml', f'nannyml_report_dist_{building_id}_{test}.svg'))
             figure = results.filter(column_names=results.continuous_column_names, methods=[test]).plot(kind='drift')
-            figure.write_image(f'nannyml_report_drift_{building_id}_{test}.svg')
+            figure.write_image(self._report_path('nannyml', f'nannyml_report_drift_{building_id}_{test}.svg'))
             
         # add into dictionary
         my_dict = {}
@@ -205,7 +213,7 @@ class AlibiDetect(Tool):
     def __init__(self, name, showReport=False):
         super().__init__(name)
         self.showReport = showReport
-        self.methods = {METHODS.KOLMOGOROV_SMIRNOV, METHODS.CVM, METHODS.SPOTDIFF}
+        self.methods = {METHODS.KOLMOGOROV_SMIRNOV, METHODS.CVM, METHODS.SPOTDIFF, METHODS.MMD, METHODS.LSDD}
 
     def preprocess(self):
         if 'prob_predicted' in self.ref:
@@ -231,6 +239,10 @@ class AlibiDetect(Tool):
                 my_dict['Cramer-von-Mises'] = self.__runDriftdetectiontest(building_id, 'cramer_von_mises')
             elif test == METHODS.SPOTDIFF:
                 my_dict['Spot-the-diff'] = self.__runDriftdetectiontest(building_id, 'spotdiff')
+            elif test == METHODS.MMD:
+                my_dict['Maximum Mean Discrepancy'] = self.__runDriftdetectiontest(building_id, 'mmd')
+            elif test == METHODS.LSDD:
+                my_dict['Least-Squares Density Difference'] = self.__runDriftdetectiontest(building_id, 'lsdd')
 
         return my_dict
 
@@ -267,7 +279,29 @@ class AlibiDetect(Tool):
                 'is_drifted': drifted
             }
             if self.showReport:
-                self.__saveSpotDiffReport(building_id, score, drifted)
+                self.__saveGlobalReport(building_id, test, score, drifted)
+        elif test == 'mmd':
+            cd = MMDDrift(x_ref = self.ref)
+            report_dict = cd.predict(self.cur, return_p_val=True)
+            score = report_dict['data']['p_val']
+            drifted = report_dict['data']['is_drift']
+            my_dict = {
+                'drift_score': score,
+                'is_drifted': drifted
+            }
+            if self.showReport:
+                self.__saveGlobalReport(building_id, test, score, drifted)
+        elif test == 'lsdd':
+            cd = LSDDDrift(x_ref = self.ref)
+            report_dict = cd.predict(self.cur, return_p_val=True)
+            score = report_dict['data']['p_val']
+            drifted = report_dict['data']['is_drift']
+            my_dict = {
+                'drift_score': score,
+                'is_drifted': drifted
+            }
+            if self.showReport:
+                self.__saveGlobalReport(building_id, test, score, drifted)
 
         return my_dict
 
@@ -288,19 +322,19 @@ class AlibiDetect(Tool):
             axes[j // ncols][j % ncols].axis('off')
         fig.suptitle(f"AlibiDetect {test} - building {building_id}")
         fig.tight_layout()
-        fig.savefig(f"alibidetect_report_{building_id}_{test}.svg")
+        fig.savefig(self._report_path('alibidetect', f"alibidetect_report_{building_id}_{test}.svg"))
         plt.close(fig)
 
-    # spot-the-diff yields one global score rather than a per-column one, so summarize it as a single bar
-    def __saveSpotDiffReport(self, building_id, p_val, is_drift):
+    # spotdiff/mmd/lsdd yield one global score rather than a per-column one, so summarize it as a single bar
+    def __saveGlobalReport(self, building_id, test, p_val, is_drift):
         drifted = bool(is_drift)
         fig, ax = plt.subplots(figsize=(4, 3))
         ax.bar(['p-value'], [p_val], color='red' if drifted else 'green')
         ax.axhline(0.05, color='black', linestyle='--', label='threshold (0.05)')
         ax.set_ylim(0, max(1.0, float(p_val) * 1.1))
-        ax.set_title(f"AlibiDetect spot-the-diff - building {building_id}\ndrift={drifted}", fontsize=9)
+        ax.set_title(f"AlibiDetect {test} - building {building_id}\ndrift={drifted}", fontsize=9)
         ax.legend(fontsize=7)
         fig.tight_layout()
-        fig.savefig(f"alibidetect_report_{building_id}_spotdiff.svg")
+        fig.savefig(self._report_path('alibidetect', f"alibidetect_report_{building_id}_{test}.svg"))
         plt.close(fig)
 

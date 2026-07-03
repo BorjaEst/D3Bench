@@ -27,6 +27,7 @@ class Benchmark:
         self.buildings = buildings
         self.runOnVm = vm
         self.driftDetectionStats = {}
+        self.tool.dataset_name = type(dataset).__name__.lower()
 
     def runBenchmark(self):
         for criteria in self.criterias:
@@ -134,10 +135,25 @@ class Benchmark:
         # Create a DataFrame from the report data
         report_df = pd.DataFrame(report_data)
 
-        if os.path.exists('benchmark_report.csv'):
-            report_df.to_csv('benchmark_report.csv', mode='a', index=False, header=False)
+        results_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results')
+        has_perf_criteria = any(c in self.criterias for c in (Criteria.RUNTIME, Criteria.CPU_RUNTIME, Criteria.STORAGE))
+
+        if has_perf_criteria:
+            # one file per execution: runtime/cpu/ram numbers are only comparable within a single run, not across appended rows
+            out_dir = os.path.join(results_dir, 'non-functional')
+            os.makedirs(out_dir, exist_ok=True)
+            execution = 1
+            while os.path.exists(os.path.join(out_dir, f'benchmark_report_{self.tool.dataset_name}_execution{execution}.csv')):
+                execution += 1
+            report_df.to_csv(os.path.join(out_dir, f'benchmark_report_{self.tool.dataset_name}_execution{execution}.csv'), index=False)
         else:
-            report_df.to_csv('benchmark_report.csv', index=False)
+            out_dir = os.path.join(results_dir, 'functional', self.tool.dataset_name)
+            os.makedirs(out_dir, exist_ok=True)
+            out_path = os.path.join(out_dir, 'benchmark_report.csv')
+            if os.path.exists(out_path):
+                report_df.to_csv(out_path, mode='a', index=False, header=False)
+            else:
+                report_df.to_csv(out_path, index=False)
 
     def runFunctional(self):
         for building_id in self.buildings:

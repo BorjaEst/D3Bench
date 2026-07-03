@@ -18,7 +18,7 @@ def main():
     # 2. select the tools
     tools = {Evidently("Evidently", False), Evidently("Evidently", True),
               NannyML("NannyML", False), NannyML("NannyML", True), 
-              AlibiDetect("AlibiDetect")} 
+              AlibiDetect("AlibiDetect", True)} 
 
     # 3. select criteria
     criteria = [Criteria.FUNCTIONAL, Criteria.RUNTIME, Criteria.CPU_RUNTIME, Criteria.STORAGE]
@@ -50,19 +50,27 @@ def runBenchmark(buildings = {1}, tests=[Criteria.FUNCTIONAL, Criteria.RUNTIME, 
 
 # delete all reports
 def clean():
-    tests = {'kolmogorov_smirnov', 'anderson', 'cramer_von_mises', 'ed', 'es', 'hellinger', 'jensenshannon', 
-             'kl_div', 'mannw', 'psi', 't_test', 'wasserstein', 'jensen_shannon'}
-    for i in range(1, 37):
-        for test in tests:
-            file_name = "evidently_report_{}_{}.html".format(i, test)
-            if os.path.exists(file_name):
-                os.remove(file_name)
-            file_name = "nannyml_report_dist_{}_{}.svg".format(i, test)
-            if os.path.exists(file_name):
-                os.remove(file_name)
-            file_name = "nannyml_report_drift_{}_{}.svg".format(i, test)
-            if os.path.exists(file_name):
-                os.remove(file_name)
+    reports_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results', 'reports')
+    evidently_tests = {'kolmogorov_smirnov', 'anderson', 'cramer_von_mises', 'ed', 'es', 'hellinger',
+             'jensenshannon', 'kl_div', 'mannw', 'psi', 't_test', 'wasserstein'}
+    nannyml_tests = {'kolmogorov_smirnov', 'wasserstein', 'jensen_shannon', 'hellinger'}
+    alibidetect_tests = {'kolmogorov_smirnov', 'cramer_von_mises', 'spotdiff', 'mmd', 'lsdd'}
+
+    for dataset_name in ('data_energy', 'data_occupacy'):
+        for i in range(1, 37):
+            for test in evidently_tests:
+                file_name = os.path.join(reports_dir, dataset_name, 'evidently', "evidently_report_{}_{}.html".format(i, test))
+                if os.path.exists(file_name):
+                    os.remove(file_name)
+            for test in nannyml_tests:
+                for kind in ('dist', 'drift'):
+                    file_name = os.path.join(reports_dir, dataset_name, 'nannyml', "nannyml_report_{}_{}_{}.svg".format(kind, i, test))
+                    if os.path.exists(file_name):
+                        os.remove(file_name)
+            for test in alibidetect_tests:
+                file_name = os.path.join(reports_dir, dataset_name, 'alibidetect', "alibidetect_report_{}_{}.svg".format(i, test))
+                if os.path.exists(file_name):
+                    os.remove(file_name)
 
 if __name__ == "__main__":
     main()
