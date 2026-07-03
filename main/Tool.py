@@ -1,7 +1,7 @@
-from evidently.report import Report
-from evidently.metric_preset import DataDriftPreset
-from evidently.metrics import *
-from evidently import ColumnMapping
+from evidently.legacy.report import Report
+from evidently.legacy.metric_preset import DataDriftPreset
+from evidently.legacy.metrics import *
+from evidently.legacy.pipeline.column_mapping import ColumnMapping
 
 import nannyml as nml # pip install nannyml
 
@@ -10,6 +10,9 @@ from alibi_detect.cd import KSDrift, CVMDrift, SpotTheDiffDrift
 from enum import Enum
 import pandas as pd # pip install pandas
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 class METHODS(Enum):
     KOLMOGOROV_SMIRNOV = 0 # K-S Test
@@ -25,6 +28,8 @@ class METHODS(Enum):
     ES = 10 # Epps-Singleton
     TT = 11 # T-Test
     SPOTDIFF = 12 # Spot-The-Difference Test
+    MMD = 13 # Maximum Mean Discrepancy
+    LSDD = 14 # Least-Squares Density Difference
 
 class Tool:
     # Class attributes
@@ -197,8 +202,9 @@ class NannyML(Tool):
         return my_dict
 
 class AlibiDetect(Tool):
-    def __init__(self, name):
+    def __init__(self, name, showReport=False):
         super().__init__(name)
+        self.showReport = showReport
         self.methods = {METHODS.KOLMOGOROV_SMIRNOV, METHODS.CVM, METHODS.SPOTDIFF}
 
     def preprocess(self):
@@ -220,15 +226,15 @@ class AlibiDetect(Tool):
         my_dict = {}
         for test in self.methods:
             if test == METHODS.KOLMOGOROV_SMIRNOV:
-                my_dict['K-S Test'] = self.__runDriftdetectiontest('kolmogorov_smirnov')
+                my_dict['K-S Test'] = self.__runDriftdetectiontest(building_id, 'kolmogorov_smirnov')
             elif test == METHODS.CVM:
-                my_dict['Cramer-von-Mises'] = self.__runDriftdetectiontest('cramer_von_mises')
+                my_dict['Cramer-von-Mises'] = self.__runDriftdetectiontest(building_id, 'cramer_von_mises')
             elif test == METHODS.SPOTDIFF:
-                my_dict['Spot-the-diff'] = self.__runDriftdetectiontest('spotdiff')
+                my_dict['Spot-the-diff'] = self.__runDriftdetectiontest(building_id, 'spotdiff')
 
         return my_dict
-    
-    def __runDriftdetectiontest(self, test):
+
+    def __runDriftdetectiontest(self, building_id, test):
         report_dict = {}
         my_dict = {}
 
@@ -239,6 +245,8 @@ class AlibiDetect(Tool):
                 col = self.column_names[i]
                 my_dict[f"{col}_drift_score"] = report_dict['data']['p_val'][i]
                 my_dict[f"{col}_is_drifted"] = report_dict['data']['is_drift'][i]
+            if self.showReport:
+                self.__saveDistributionReport(building_id, test, report_dict['data']['p_val'], report_dict['data']['is_drift'])
         elif test == 'cramer_von_mises':
             cd = CVMDrift(x_ref = self.ref)
             report_dict = cd.predict(self.cur, drift_type='feature', return_p_val=True)
@@ -246,6 +254,8 @@ class AlibiDetect(Tool):
                 col = self.column_names[i]
                 my_dict[f"{col}_drift_score"] = report_dict['data']['p_val'][i]
                 my_dict[f"{col}_is_drifted"] = report_dict['data']['is_drift'][i]
+            if self.showReport:
+                self.__saveDistributionReport(building_id, test, report_dict['data']['p_val'], report_dict['data']['is_drift'])
         elif test == 'spotdiff':
             self.ref, self.cur = np.asarray(self.ref, np.float32), np.asarray(self.cur, np.float32)
             cd = SpotTheDiffDrift(x_ref = self.ref)
@@ -256,7 +266,41 @@ class AlibiDetect(Tool):
                 'drift_score': score,
                 'is_drifted': drifted
             }
-
+            if self.showReport:
+                self.__saveSpotDiffReport(building_id, score, drifted)
 
         return my_dict
+
+    # per-column reference vs. current distribution overlay, annotated with p-value/drift status
+    def __saveDistributionReport(self, building_id, test, p_vals, is_drift):
+        n = len(self.column_names)
+        ncols = min(n, 4)
+        nrows = -(-n // ncols)
+        fig, axes = plt.subplots(nrows, ncols, figsize=(4 * ncols, 3 * nrows), squeeze=False)
+        for i, col in enumerate(self.column_names):
+            ax = axes[i // ncols][i % ncols]
+            ax.hist(self.ref[:, i], bins=30, alpha=0.5, label='reference', density=True)
+            ax.hist(self.cur[:, i], bins=30, alpha=0.5, label='current', density=True)
+            drifted = bool(is_drift[i])
+            ax.set_title(f"{col}\np={p_vals[i]:.3g}  drift={drifted}", color='red' if drifted else 'green', fontsize=9)
+            ax.legend(fontsize=7)
+        for j in range(n, nrows * ncols):
+            axes[j // ncols][j % ncols].axis('off')
+        fig.suptitle(f"AlibiDetect {test} - building {building_id}")
+        fig.tight_layout()
+        fig.savefig(f"alibidetect_report_{building_id}_{test}.svg")
+        plt.close(fig)
+
+    # spot-the-diff yields one global score rather than a per-column one, so summarize it as a single bar
+    def __saveSpotDiffReport(self, building_id, p_val, is_drift):
+        drifted = bool(is_drift)
+        fig, ax = plt.subplots(figsize=(4, 3))
+        ax.bar(['p-value'], [p_val], color='red' if drifted else 'green')
+        ax.axhline(0.05, color='black', linestyle='--', label='threshold (0.05)')
+        ax.set_ylim(0, max(1.0, float(p_val) * 1.1))
+        ax.set_title(f"AlibiDetect spot-the-diff - building {building_id}\ndrift={drifted}", fontsize=9)
+        ax.legend(fontsize=7)
+        fig.tight_layout()
+        fig.savefig(f"alibidetect_report_{building_id}_spotdiff.svg")
+        plt.close(fig)
 

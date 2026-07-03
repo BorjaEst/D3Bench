@@ -13,7 +13,7 @@ This repository contains the source code of the paper titled <a href=https://arx
 
 Clone the repository with submodules:
 ```shell
-git clone https://git.sagresearch.de/kompaki/edd/d3-benchmark.git --recurse-submodules
+git clone https://github.com/BorjaEst/D3Bench.git --recurse-submodules
 ```
 
 The installation prerequisites are:
